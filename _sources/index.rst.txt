@@ -1,7 +1,7 @@
 .. _introduction:
 
 ROS 2 testbed for DJI RoboMaster series drones and robots
-=============================================================================
+=========================================================
 
 robomaster_ros2 is a **work-in-progress** port of original `RoboMaster-SDK <https://github.com/dji-sdk/RoboMaster-SDK>`_ to ROS 2.
 It is fully open-source and will be available on `github <https://github.com/L2S-lab/robomaster_ros2>`_. 
