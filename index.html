@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Robomaster ROS 2: A ROS 2 testbed for DJI RoboMaster series drones and robots &mdash; Robmaster ROS 2 1.0a1 documentation</title>
+  <title>ROS 2 testbed for DJI RoboMaster series drones and robots &mdash; Robmaster ROS 2 1.0a1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -18,7 +18,8 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,11 +41,15 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Robomaster ROS 2: A ROS 2 testbed for DJI RoboMaster series drones and robots</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">ROS 2 Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -59,7 +64,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Robomaster ROS 2: A ROS 2 testbed for DJI RoboMaster series drones and robots</li>
+      <li class="breadcrumb-item active">ROS 2 testbed for DJI RoboMaster series drones and robots</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -69,15 +74,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="robomaster-ros-2-a-ros-2-testbed-for-dji-robomaster-series-drones-and-robots">
-<span id="introduction"></span><h1>Robomaster ROS 2: A ROS 2 testbed for DJI RoboMaster series drones and robots<a class="headerlink" href="#robomaster-ros-2-a-ros-2-testbed-for-dji-robomaster-series-drones-and-robots" title="Link to this heading"></a></h1>
-<p>Robomaster ROS 2 is a <strong>work-in-progress</strong></p>
+  <section id="ros-2-testbed-for-dji-robomaster-series-drones-and-robots">
+<span id="introduction"></span><h1>ROS 2 testbed for DJI RoboMaster series drones and robots<a class="headerlink" href="#ros-2-testbed-for-dji-robomaster-series-drones-and-robots" title="Link to this heading"></a></h1>
+<p>robomaster_ros2 is a <strong>work-in-progress</strong> port of original <a class="reference external" href="https://github.com/dji-sdk/RoboMaster-SDK">RoboMaster-SDK</a> to ROS 2.
+It is fully open-source and will be available on <a class="reference external" href="https://github.com/L2S-lab/robomaster_ros2">github</a>.</p>
+<p>It is primarily made for research purposes. The package allows the operation of a team of RoboMaster Tello Talent (RMTT) drones and/or RoboMaster EP Core (RMEP) robots over the local wi-fi network. It opens up the possibilities of a heterogeneous network of robots and drones.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>robomaster_ros2 is already usable for most tasks, however configuration file formats might still change. While many features of original SDK are ported, there are currently still some important limitations.</p>
+<ul class="simple">
+<li><p>Tested only for small team sizes (less than 7 drones and 2 robots)</p></li>
+</ul>
+</div>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">ROS 2 Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+</ul>
+</div>
+</section>
 </section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
