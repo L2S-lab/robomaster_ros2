@@ -21,6 +21,7 @@ Contents
    installation
    overview
    usage
+   simulation
    tutorials
    howto
    faq
