@@ -16,7 +16,7 @@ jobs:
           github-token: ${{ secrets.TOKEN }}
           owner: 'L2S-lab'
           repository: 'robomaster_ros2'
-          branch: 'repo-insight'
+          branch: 'main'
 
       - name: Checkout repo-insight branch
         uses: actions/checkout@v4
