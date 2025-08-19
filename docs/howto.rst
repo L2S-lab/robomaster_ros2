@@ -14,7 +14,7 @@ Use the `setup_wifi.yaml` file to setup the configuration required.
 
 Drones:
 
-Connect the external module to the RMTT drones, switch the connection mode to **direct**(AP mode) connection and power on all the drones.
+Connect the external module to the RMTT drones, switch the connection mode to **direct** (AP mode) connection and power on all the drones.
 
 .. image:: images/ext_module.jpg
    :align: center
@@ -39,7 +39,7 @@ This will connect your PC to the RMTT drones one by one and excecute the necessa
 The QR code will be displayed on seperate window. press the red/white small button on the side of the robot's connection switch and scan it using the robot's camera to connect the robot to the Wi-Fi network.
 
 
-Once the setup is done, drones need turn off and switch to the **router**(STA mode) connection mode.
+Once the setup is done, drones need turn off and switch to the **router** (STA mode) connection mode.
 Now when the drones are powered on, they will connect to the Wi-Fi network and propeller will start spinning at low speed. This indicates the connection is successful. (It can take couple of minutes)
 
 .. note::
