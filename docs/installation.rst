@@ -24,6 +24,7 @@ First Installation
 3. Install dependencies
 
    .. code-block:: bash
+
       pip install pillow myqr pynput
       sudo apt-get install network-manager libopus-dev
       sudo apt install ros-$ROS_DISTRO-tf-transformations ros-$ROS_DISTRO-nav-msgs
@@ -31,6 +32,7 @@ First Installation
    Optional Installation for video streaming
 
    .. code-block:: bash
+      
       pip install git+https://github.com/aarsht7/RoboMaster-SDK.git@libmedia_codec
 
 4. Set up your ROS 2 workspace
