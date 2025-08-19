@@ -17,7 +17,7 @@ Ubuntu Python   ROS 2
 First Installation
 ------------------
 
-1. If needed, install ROS 2 using the instructions at https://docs.ros.org/en/humble/Installation.html.
+1. If needed, install ROS 2 using the instructions at https://docs.ros.org/en/humble/Installation.html
 
 2. If needed, install gzsim Harmonic using this instruction at https://gazebosim.org/docs/latest/ros_installation/#gazebo-harmonic-with-ros-2-humble-or-rolling-use-with-caution
 
@@ -35,7 +35,7 @@ First Installation
 
       pip install git+https://github.com/aarsht7/RoboMaster-SDK.git@libmedia_codec
 
-4. Set up your ROS 2 workspace
+4. Set up ROS 2 workspace
 
     .. code-block:: bash
 
@@ -43,7 +43,7 @@ First Installation
         cd ros2_ws/src
         git clone https://github.com/L2S-lab/robomaster_ros2.git
 
-5. Build your ROS 2 workspace
+5. Build ROS 2 workspace
 
     .. code-block:: bash
 
