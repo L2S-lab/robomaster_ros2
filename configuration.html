@@ -1,0 +1,185 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration &mdash; Robmaster ROS 2 1.0a1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=036e6a88"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How To" href="howto.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robmaster ROS 2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#robomaster-server-yaml">robomaster_server.yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rmtt-param-yaml">rmtt_param.yaml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robmaster ROS 2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/configuration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration">
+<span id="id1"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
+<p>All configuration files are located in the <cite>robomaster_ros2/config_ros</cite> directory.</p>
+<ul class="simple">
+<li><p>robomaster_server.yaml: Setting up the server node and parameters that are changed often.</p></li>
+<li><p>rmtt_param.yaml: Configuration for the RoboMaster Tello Talent (RMTT) drones.</p></li>
+<li><p>rmep_param.yaml: Configuration for the RoboMaster EP Core (RMEP) robots.</p></li>
+<li><p>custom_char.yaml: Custom characters for the RMTT drones external module LED matrix.</p></li>
+<li><p>setup_wifi.yaml: Configuration for the Wi-Fi connection of the RMTT drones and RMEP robots.</p></li>
+<li><p>retrieve_robot_info.yaml: Configuration for the retrieval of information of connected robots and drones.</p></li>
+</ul>
+<section id="robomaster-server-yaml">
+<h2>robomaster_server.yaml<a class="headerlink" href="#robomaster-server-yaml" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">local_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.106&quot;</span><span class="w">      </span><span class="c1"># local ip of the network on which drones are connected</span>
+<span class="nt">num_of_drones</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">               </span><span class="c1"># number of drones to be used</span>
+<span class="nt">num_of_eps1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">                 </span><span class="c1"># number of EP or S1 Robots to be used</span>
+<span class="nt">random_assign</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">            </span><span class="c1"># whether to assign drones and robot numbers randomly (Ascending order of IPs last octet)</span>
+</pre></div>
+</div>
+</section>
+<section id="rmtt-param-yaml">
+<h2>rmtt_param.yaml<a class="headerlink" href="#rmtt-param-yaml" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rmtt</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mled_display_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">         </span><span class="c1"># whether to display the number of the drone on the mled  on initalisation</span>
+<span class="w">    </span><span class="nt">external_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">       </span><span class="c1"># (WIP) whether to use external positioning system such as mocap</span>
+<span class="w">    </span><span class="nt">drone_name_list</span><span class="p">:</span><span class="w">               </span><span class="c1"># list of names of all the drones that you want to add now or in future (mandatory)</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmtt_1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmtt_2</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmtt_3</span>
+
+<span class="w">    </span><span class="nt">pub_front_tof</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">           </span><span class="c1"># (Too heavy on process, avoid using with multi drones) whether to publish front tof sensor data</span>
+<span class="w">    </span><span class="nt">pub_bottom_tof</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">           </span><span class="c1"># whether to publish bottom tof sensor data</span>
+<span class="w">    </span><span class="nt">pub_attitude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">             </span><span class="c1"># whether to publish attitude data</span>
+<span class="w">    </span><span class="nt">pub_barometer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">           </span><span class="c1"># (WIP units issue)</span>
+<span class="w">    </span><span class="nt">pub_imu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># (WIP units issue)</span>
+<span class="w">    </span><span class="nt">pub_mpad</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                </span><span class="c1"># Publish info of mission pad below the drone</span>
+
+<span class="w">    </span><span class="c1"># It is advisible to use the random_assign option in robomaster_server.yaml</span>
+
+<span class="w">    </span><span class="c1">#####MANDATORY#####</span>
+<span class="w">    </span><span class="c1"># Individual drone configurations and parameter control for all the drones</span>
+<span class="w">    </span><span class="c1"># name in the list should be the same as the name in the drone_name_list</span>
+<span class="w">    </span><span class="c1"># topic_type: Pose/ PoseStamped/ Point/ PointStamped</span>
+<span class="w">    </span><span class="nt">rmtt_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.151&quot;</span>
+<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">        </span><span class="nt">cam_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">             </span><span class="c1"># 0: forward, 1: down</span>
+<span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmtt_1/pose</span>
+
+<span class="w">    </span><span class="nt">rmtt_2</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.152&quot;</span>
+<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">        </span><span class="nt">cam_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">             </span><span class="c1"># 0: forward, 1: down</span>
+<span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmtt_2/pose</span>
+
+<span class="w">    </span><span class="nt">rmtt_3</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.153&quot;</span>
+<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">        </span><span class="nt">cam_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">             </span><span class="c1"># 0: forward, 1: down</span>
+<span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmtt_3/pose</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="howto.html" class="btn btn-neutral float-right" title="How To" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 Aarsh Thakker (CentraleSupélec), and contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

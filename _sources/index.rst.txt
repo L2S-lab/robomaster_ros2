@@ -20,9 +20,9 @@ Contents
 .. toctree::
    installation
    overview
-   usage
+   configuration
+   howto
    simulation
    tutorials
-   howto
    faq
    :maxdepth: 1
