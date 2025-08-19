@@ -44,9 +44,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#explanation-of-packages">Explanation of packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interfaces">Interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#robomaster-ros-2">RoboMaster Ros 2</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">ROS 2 Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
@@ -78,7 +83,101 @@
              
   <section id="overview">
 <span id="id1"></span><h1>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h1>
-<p>This page will explain the overview of the RoboMaster ROS 2 nodes:</p>
+<p>This page explain the overview of the RoboMaster ROS 2 packages:</p>
+<section id="explanation-of-packages">
+<h2>Explanation of packages<a class="headerlink" href="#explanation-of-packages" title="Link to this heading"></a></h2>
+<p>Source code is divided into several packages, each with its own purpose:</p>
+<ul class="simple">
+<li><p><strong>robomaster_interface</strong>: This package provides the interface for controlling the RoboMaster robots and drones.</p></li>
+<li><p><strong>robomaster_ros2</strong>: This package contains the main implementation of the RoboMaster ROS 2 node.</p></li>
+<li><p><strong>robomaster_examples</strong>: This package includes example scripts using the RoboMaster ROS 2 node.</p></li>
+<li><p><strong>robomaster_gz</strong>: This package provides integration with Gazebo for simulating the RoboMaster drones.</p></li>
+</ul>
+</section>
+<section id="interfaces">
+<h2>Interfaces<a class="headerlink" href="#interfaces" title="Link to this heading"></a></h2>
+<p>The <cite>robomaster_interface</cite> package provides the interface for controlling the RoboMaster robots and drones. It includes the necessary messages, services, and actions for communication between the ROS 2 nodes and the RoboMaster devices.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>GimbalAngle</p></td>
+<td><p>Message</p></td>
+<td><p>Message description for the gimbal angle of the robot.</p></td>
+</tr>
+<tr class="row-odd"><td><p>GimbalVel</p></td>
+<td><p>Message</p></td>
+<td><p>Message description for the gimbal velocity of the robot.</p></td>
+</tr>
+<tr class="row-even"><td><p>TelloMpad</p></td>
+<td><p>Message</p></td>
+<td><p>Message description for the Tello mission pad recognition.</p></td>
+</tr>
+<tr class="row-odd"><td><p>AddDrone</p></td>
+<td><p>Service</p></td>
+<td><p>Service to add a drone to the system.</p></td>
+</tr>
+<tr class="row-even"><td><p>AddRobot</p></td>
+<td><p>Service</p></td>
+<td><p>Service to add a robot to the system.</p></td>
+</tr>
+<tr class="row-odd"><td><p>RemoveRobot</p></td>
+<td><p>Service</p></td>
+<td><p>Service to remove a drone/robot from the system.</p></td>
+</tr>
+<tr class="row-even"><td><p>Takeoff</p></td>
+<td><p>Service</p></td>
+<td><p>Service to command the drone to take off.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SetSpeed</p></td>
+<td><p>Service</p></td>
+<td><p>Service to set the speed of the drone.</p></td>
+</tr>
+<tr class="row-even"><td><p>TelloLED</p></td>
+<td><p>Service</p></td>
+<td><p>Service to control the LED of the Tello external module.</p></td>
+</tr>
+<tr class="row-odd"><td><p>TelloMled</p></td>
+<td><p>Service</p></td>
+<td><p>Service to control the 8x8 matrix LED of the Tello external module</p></td>
+</tr>
+<tr class="row-even"><td><p>MoveChassis</p></td>
+<td><p>Service</p></td>
+<td><p>Service to move the chassis of the robot.</p></td>
+</tr>
+<tr class="row-odd"><td><p>MoveArm</p></td>
+<td><p>Service</p></td>
+<td><p>Service to move the arm of the robot.</p></td>
+</tr>
+<tr class="row-even"><td><p>MoveGimbal</p></td>
+<td><p>Service</p></td>
+<td><p>Service to move the gimbal of the robot.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gripper</p></td>
+<td><p>Service</p></td>
+<td><p>Service to open or close the gripper of the robot.</p></td>
+</tr>
+<tr class="row-even"><td><p>RobotLED</p></td>
+<td><p>Service</p></td>
+<td><p>Service to control the LED modules of the robot.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fire</p></td>
+<td><p>Service</p></td>
+<td><p>Service to fire IR/gel-beans using the robots gimbal.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="robomaster-ros-2">
+<h2>RoboMaster Ros 2<a class="headerlink" href="#robomaster-ros-2" title="Link to this heading"></a></h2>
+<p>The <cite>robomaster_ros2</cite> package is the main implementation of the RoboMaster server as well as several helper nodes. It provides the core functionality for controlling the RoboMaster robots and drones, including communication with the devices, handling of messages, and execution of commands.</p>
+<a class="reference internal image-reference" href="_images/connection.png"><img alt="Connection overview" class="align-center" src="_images/connection.png" style="width: 600px;" />
+</a>
+</section>
 </section>
 
 
