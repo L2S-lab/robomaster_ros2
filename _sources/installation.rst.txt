@@ -12,7 +12,7 @@ Ubuntu Python   ROS 2
 ====== ======== ======
 
 .. warning::
-   Avoid using a virtual machine if possible: they add additional latency and might cause issues with the visualization tools.
+   Avoid using a virtual machine if possible: they add additional latency and might cause issues with the network setup.
 
 First Installation
 ------------------
@@ -32,7 +32,7 @@ First Installation
    Optional Installation for video streaming
 
    .. code-block:: bash
-      
+
       pip install git+https://github.com/aarsht7/RoboMaster-SDK.git@libmedia_codec
 
 4. Set up your ROS 2 workspace

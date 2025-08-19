@@ -47,7 +47,10 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#explanation-of-packages">Explanation of packages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#interfaces">Interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#robomaster-ros-2">RoboMaster Ros 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#robomaster-ros-2">RoboMaster ROS 2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#robomaster-server">robomaster server</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
@@ -173,10 +176,142 @@
 </table>
 </section>
 <section id="robomaster-ros-2">
-<h2>RoboMaster Ros 2<a class="headerlink" href="#robomaster-ros-2" title="Link to this heading"></a></h2>
+<h2>RoboMaster ROS 2<a class="headerlink" href="#robomaster-ros-2" title="Link to this heading"></a></h2>
 <p>The <cite>robomaster_ros2</cite> package is the main implementation of the RoboMaster server as well as several helper nodes. It provides the core functionality for controlling the RoboMaster robots and drones, including communication with the devices, handling of messages, and execution of commands.</p>
-<a class="reference internal image-reference" href="_images/connection.png"><img alt="Connection overview" class="align-center" src="_images/connection.png" style="width: 600px;" />
-</a>
+<img alt="Connection overview" class="align-center" src="_images/connection.png" />
+<section id="robomaster-server">
+<h3>robomaster server<a class="headerlink" href="#robomaster-server" title="Link to this heading"></a></h3>
+<p>This is the main node, handles the server type framework for the RoboMaster robots and drones. It is used to configure/add/remove drones and robots as well as handles several common services.</p>
+<p>Topics and services provided by the server and the added robo/drone:</p>
+<p>List of services:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>/add_drone</p></td>
+<td><p>AddDrone</p></td>
+</tr>
+<tr class="row-odd"><td><p>/add_robot</p></td>
+<td><p>AddRobot</p></td>
+</tr>
+<tr class="row-even"><td><p>/remove_robot</p></td>
+<td><p>RemoveRobot</p></td>
+</tr>
+<tr class="row-odd"><td><p>/takeoff_all</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-even"><td><p>/land_all</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/get_ns</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/get_battery</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/set_speed</p></td>
+<td><p>SetSpeed</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/takeoff</p></td>
+<td><p>Takeoff</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/land</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/hover</p></td>
+<td><p>Empty</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/soft_emergency</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/emergency</p></td>
+<td><p>Empty</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/set_led</p></td>
+<td><p>TelloLED</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/set_mled</p></td>
+<td><p>TelloMled</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/status</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/reboot</p></td>
+<td><p>Empty</p></td>
+</tr>
+<tr class="row-odd"><td><p>/robot_1/get_ns</p></td>
+<td><p>Trigger</p></td>
+</tr>
+<tr class="row-even"><td><p>/robot_1/led_chassis</p></td>
+<td><p>RobotLED</p></td>
+</tr>
+<tr class="row-odd"><td><p>/robot_1/move_gimbal</p></td>
+<td><p>MoveGimbal</p></td>
+</tr>
+<tr class="row-even"><td><p>/robot_1/fire</p></td>
+<td><p>Fire</p></td>
+</tr>
+<tr class="row-odd"><td><p>/robot_1/move_arm</p></td>
+<td><p>MoveArm</p></td>
+</tr>
+<tr class="row-even"><td><p>/robot_1/gripper</p></td>
+<td><p>Gripper</p></td>
+</tr>
+</tbody>
+</table>
+<p>List of topics (published/subscribed):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>/drone_1/rmtt_server/pose</p></td>
+<td><p>Pose</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/front_tof</p></td>
+<td><p>Range</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/bottom_tof</p></td>
+<td><p>Range</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/imu</p></td>
+<td><p>Imu</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/attitude</p></td>
+<td><p>QuaternionStamped</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/baro</p></td>
+<td><p>FluidPressure</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/mpad</p></td>
+<td><p>TelloMpad</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/image</p></td>
+<td><p>Image</p></td>
+</tr>
+<tr class="row-even"><td><p>/drone_1/cmd_vel</p></td>
+<td><p>Twist</p></td>
+</tr>
+<tr class="row-odd"><td><p>/drone_1/external_position</p></td>
+<td><p>PoseStamped</p></td>
+</tr>
+<tr class="row-even"><td><p>/robot_1/arm_position</p></td>
+<td><p>PointStamped</p></td>
+</tr>
+<tr class="row-odd"><td><p>/robot_1/gimbal_cmd_vel</p></td>
+<td><p>GimbalVel</p></td>
+</tr>
+<tr class="row-even"><td><p>/robot_1/cmd_vel</p></td>
+<td><p>Twist</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 </section>
 
