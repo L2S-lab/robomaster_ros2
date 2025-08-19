@@ -114,6 +114,7 @@ setup_wifi.yaml
 ~~~~~~~~~~~~~~~
 
 .. code-block:: yaml
+    
     # ssid of the router that all robots will connect to
     SSID: "TP-link_1234"
 
