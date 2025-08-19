@@ -46,7 +46,11 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How To</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How To</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setup-wi-fi-for-rmtt-and-rmep">Setup Wi-Fi for RMTT and RMEP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start-the-robomaster-server">Start the robomaster server</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
@@ -78,6 +82,40 @@
              
   <section id="how-to">
 <span id="howtos"></span><h1>How To<a class="headerlink" href="#how-to" title="Link to this heading"></a></h1>
+<section id="setup-wi-fi-for-rmtt-and-rmep">
+<h2>Setup Wi-Fi for RMTT and RMEP<a class="headerlink" href="#setup-wi-fi-for-rmtt-and-rmep" title="Link to this heading"></a></h2>
+<p>All the drones and robots are tested with 2.4 GHz Wi-Fi network.
+It is advisible to assign static IPs to the RMTT drones and RMEP robots using the router settings and label the robots and drones with their IPs for ease of use.
+If dynamic IP are used, enable <cite>random_assign</cite> option in the <cite>robomaster_server.yaml</cite> file.</p>
+<p>Use the <cite>setup_wifi.yaml</cite> file to setup the configuration required.</p>
+<p>Drones:</p>
+<p>Connect the external module to the RMTT drones, switch the connection mode to <strong>direct</strong> (AP mode) connection and power on all the drones.</p>
+<img alt="External module" class="align-center" src="_images/ext_module.jpg" />
+<p>Robots:</p>
+<p>Turn on the robots and switch the connection mode to <strong>router</strong> connection.</p>
+<img alt="EP Wi-Fi settings" class="align-center" src="_images/ep-wifi.png" />
+<p>Once all the drones and robots are powered on, run the following command.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>setup_wifi.launch.py
+</pre></div>
+</div>
+<p>This will connect your PC to the RMTT drones one by one and excecute the necessary commands to set up the Wi-Fi connection.</p>
+<p>The QR code will be displayed on seperate window. press the red/white small button on the side of the robot’s connection switch and scan it using the robot’s camera to connect the robot to the Wi-Fi network.</p>
+<p>Once the setup is done, drones need turn off and switch to the <strong>router</strong> (STA mode) connection mode.
+Now when the drones are powered on, they will connect to the Wi-Fi network and propeller will start spinning at low speed. This indicates the connection is successful. (It can take couple of minutes)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This setup procedure is generally only required once. If a drone or robot is unable to connect to the network, repeat the setup process for the specific robot/drone.</p>
+</div>
+</section>
+<section id="start-the-robomaster-server">
+<h2>Start the robomaster server<a class="headerlink" href="#start-the-robomaster-server" title="Link to this heading"></a></h2>
+<p>Once all the drones, robots and PC are connected to the Wi-Fi network, robomaster server can be started.</p>
+<p>Check the <cite>rmtt_param.yaml</cite> and <cite>rmep_param.yaml</cite> files to ensure the parameters are set correctly for the drones and robots.</p>
+<p>Check the <cite>robomaster_server.yaml</cite> file to ensure the local IP, number of drones and robots are set correctly.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>robomaster_server.launch.py
+</pre></div>
+</div>
+</section>
 </section>
 
 

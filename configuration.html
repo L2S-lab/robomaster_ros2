@@ -48,6 +48,10 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#robomaster-server-yaml">robomaster_server.yaml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rmtt-param-yaml">rmtt_param.yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rmep-param-yaml">rmep_param.yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup-wifi-yaml">setup_wifi.yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-char-yaml">custom_char.yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#retrieve-robot-info-yaml">retrieve_robot_info.yaml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
@@ -83,13 +87,17 @@
   <section id="configuration">
 <span id="id1"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
 <p>All configuration files are located in the <cite>robomaster_ros2/config_ros</cite> directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Configuration files are subject to minor changes, please check the latest version in the repository.</p>
+</div>
 <ul class="simple">
-<li><p>robomaster_server.yaml: Setting up the server node and parameters that are changed often.</p></li>
-<li><p>rmtt_param.yaml: Configuration for the RoboMaster Tello Talent (RMTT) drones.</p></li>
-<li><p>rmep_param.yaml: Configuration for the RoboMaster EP Core (RMEP) robots.</p></li>
-<li><p>custom_char.yaml: Custom characters for the RMTT drones external module LED matrix.</p></li>
-<li><p>setup_wifi.yaml: Configuration for the Wi-Fi connection of the RMTT drones and RMEP robots.</p></li>
-<li><p>retrieve_robot_info.yaml: Configuration for the retrieval of information of connected robots and drones.</p></li>
+<li><p><cite>robomaster_server.yaml</cite>: Setting up the server node and parameters that are changed often.</p></li>
+<li><p><cite>rmtt_param.yaml</cite>: Configuration for the RoboMaster Tello Talent (RMTT) drones.</p></li>
+<li><p><cite>rmep_param.yaml</cite>: Configuration for the RoboMaster EP Core (RMEP) robots.</p></li>
+<li><p><cite>setup_wifi.yaml</cite>: Configuration for the Wi-Fi connection of the RMTT drones and RMEP robots.</p></li>
+<li><p><cite>custom_char.yaml</cite>: Custom characters for the RMTT drones external module LED matrix.</p></li>
+<li><p><cite>retrieve_robot_info.yaml</cite>: Configuration for the retrieval of information of connected robots and drones.</p></li>
 </ul>
 <section id="robomaster-server-yaml">
 <h2>robomaster_server.yaml<a class="headerlink" href="#robomaster-server-yaml" title="Link to this heading"></a></h2>
@@ -146,6 +154,116 @@
 <span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
 <span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
 <span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmtt_3/pose</span>
+</pre></div>
+</div>
+</section>
+<section id="rmep-param-yaml">
+<h2>rmep_param.yaml<a class="headerlink" href="#rmep-param-yaml" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rmep</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">led_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># whether to display specific led pattern for specific number (R1,R2,R3,R4,G1,G2,G3,G4,B1,B2,B3,B4) etc for 1 to 12</span>
+<span class="w">    </span><span class="nt">external_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">       </span><span class="c1"># (WIP) whether to use external positioning system such as mocap</span>
+<span class="w">    </span><span class="nt">robot_name_list</span><span class="p">:</span><span class="w">               </span><span class="c1"># list of names of the robots (mandatory)</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmep_1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmep_2</span>
+
+<span class="w">    </span><span class="c1"># WIP (Work in Progress) not working now</span>
+<span class="w">    </span><span class="nt">pub_imu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># (WIP units issue)</span>
+<span class="w">    </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># (WIP units issue)</span>
+<span class="w">    </span><span class="nt">pub_marker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
+<span class="w">    </span><span class="nt">pub_armpose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">              </span><span class="c1"># Publish arm pose of the robot</span>
+
+<span class="c1"># Individual robot configurations and parameter control</span>
+<span class="c1"># name in the list should be the same as the name in the robot_name_list</span>
+<span class="c1"># mandatory while usuing external position</span>
+<span class="c1"># topic_type: Pose/ PoseStamped/ Point/ PointStamped</span>
+<span class="w">    </span><span class="nt">rmep_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.161&quot;</span>
+<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># WIP</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmep_1/pose</span>
+
+<span class="w">    </span><span class="nt">rmep_2</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.162&quot;</span>
+<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># WIP</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
+<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmep_2/pose</span>
+</pre></div>
+</div>
+</section>
+<section id="setup-wifi-yaml">
+<h2>setup_wifi.yaml<a class="headerlink" href="#setup-wifi-yaml" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ssid of the router that all robots will connect to</span>
+<span class="nt">SSID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TP-link_1234&quot;</span>
+
+<span class="c1"># password of the router that you want to connect</span>
+<span class="c1"># can be &quot;-1&quot; to retrive the password from the saved network</span>
+<span class="c1"># OR &quot;None&quot; if there is no password</span>
+<span class="nt">PSK</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-1&quot;</span>
+
+<span class="c1"># use only provided numbers in form of the list to modify the details</span>
+<span class="c1"># [0] if you don&#39;t use drones</span>
+<span class="nt">UPDATE</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">8</span><span class="p p-Indicator">,</span><span class="nv">6</span><span class="p p-Indicator">]</span>
+
+<span class="c1"># For EP/S1 robots, you have to connect manually scanning a QR code.</span>
+<span class="c1"># It will dispaly the QR code at end and save the image in the base directory</span>
+<span class="nt">EP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+
+<span class="nt">drone_list</span><span class="p">:</span>
+<span class="w">    </span><span class="c1">#pwd: password of all the tello if they are the same,</span>
+<span class="w">    </span><span class="c1"># use n#&gt;pwd if there is different passwords or &quot;None&quot; if there is no password</span>
+<span class="w">    </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
+<span class="c1"># n+number:</span>
+<span class="c1">#   ssid: ssid of the tello hotspot</span>
+<span class="c1">#   pwd: password associated with the above ssid (&#39;&#39; for no password)</span>
+<span class="w">    </span><span class="nt">n1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ssid</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RMTT-1&quot;</span>
+<span class="w">        </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
+
+<span class="w">    </span><span class="nt">n2</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ssid</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RMTT-2&quot;</span>
+<span class="w">        </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
+
+<span class="w">    </span><span class="nt">n3</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ssid</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RMTT-3&quot;</span>
+<span class="w">        </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-char-yaml">
+<h2>custom_char.yaml<a class="headerlink" href="#custom-char-yaml" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># You can put your custom characters here with the following format.</span>
+<span class="c1"># Replace bits with the color you want to put at that pixel</span>
+<span class="c1"># 0: off, r: red, b: blue, p:purple</span>
+<span class="c1"># smile:</span>
+<span class="c1"># 0 0 ∎ ∎ ∎ ∎ 0 0</span>
+<span class="c1"># 0 ∎ 0 0 0 0 ∎ 0</span>
+<span class="c1"># ∎ 0 ∎ 0 0 ∎ 0 ∎</span>
+<span class="c1"># ∎ 0 0 0 0 0 0 ∎</span>
+<span class="c1"># ∎ 0 ∎ 0 0 ∎ 0 ∎</span>
+<span class="c1"># ∎ 0 0 ∎ ∎ 0 0 ∎</span>
+<span class="c1"># 0 ∎ 0 0 0 0 ∎ 0</span>
+<span class="c1"># 0 0 ∎ ∎ ∎ ∎ 0 0</span>
+<span class="c1"># For visualisation: https://xantorohara.github.io/led-matrix-editor/</span>
+
+<span class="nt">smile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00&#39;</span>
+<span class="nt">smile2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000000000b0000b0b0b00b0b000000000000000000r00r00000rr00000000000&#39;</span>
+<span class="nt">ok</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000000000000000r000000r000000r00r000r0000r0r000000r0000000000000&#39;</span>
+<span class="nt">star</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000000000rr00rr000rrrr00rrrrrrrr00rrrr000rr00rr00000000000000000&#39;</span>
+<span class="nt">question</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;00rrrr000rr00rr000000rr00000rr00000rr00000000000000rr00000000000&#39;</span>
+<span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0000000000rrrr000rr000r00r0r00r00r00r0r00r000rr000rrrr0000000000&#39;</span>
+<span class="nt">exclamation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000rr00000rrrr0000rrrr00000rr000000rr00000000000000rr00000000000&#39;</span>
+<span class="nt">double_exclamation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0rr00rr00rr00rr00rr00rr00rr00rr0000000000rr00rr00rr00rr000000000&#39;</span>
+<span class="nt">heart</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0000000000r00r000rrrrrr00rrrrrr00rrrrrr000rrrr00000rr00000000000&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="retrieve-robot-info-yaml">
+<h2>retrieve_robot_info.yaml<a class="headerlink" href="#retrieve-robot-info-yaml" title="Link to this heading"></a></h2>
+<p>This is not used in the latest version but can be handy, hence it is included here.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of drones connected to network (0 if you are not using any)</span>
+<span class="nt">RMTT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="c1"># number of EP/S1 robots connected to network (0 if you are not using any)</span>
+<span class="nt">EP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 </pre></div>
 </div>
 </section>
