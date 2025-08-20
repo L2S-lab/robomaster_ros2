@@ -1,48 +1,19 @@
-name: Collect repository insights
+name: github-repo-stats
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs daily at midnight
-  workflow_dispatch:
+    # Run this once per day, towards the end of the day for keeping the most
+    # recent data point most meaningful (hours are interpreted in UTC).
+    - cron: "0 23 * * *"
+  workflow_dispatch: # Allow for running this manually.
 
 jobs:
-  update-stats:
+  j1:
+    name: github-repo-stats
     runs-on: ubuntu-latest
     steps:
-      - name: Collect insights
-        id: collect-insights
-        uses: polygenelubricants/repository-insight-tracker@v1.0.0
+      - name: run-ghrs
+        # Use latest release.
+        uses: jgehrcke/github-repo-stats@RELEASE
         with:
-          github-token: ${{ secrets.TOKEN }}
-          owner: 'L2S-lab'
-          repository: 'robomaster_ros2'
-          branch: 'main'
-
-      - name: Checkout repo-insight branch
-        uses: actions/checkout@v4
-        with:
-          ref: 'repo-insight'
-          token: ${{ secrets.TOKEN }}
-
-      - name: Update README
-        run: |
-          echo "# Repository Insights" > README.md
-          echo "" >> README.md
-          echo "## Statistics" >> README.md
-          echo "| Category | Count |" >> README.md
-          echo "|---|---|" >> README.md
-          echo "| Stargazers | ${{ steps.collect-insights.outputs.stargazers }} |" >> README.md
-          echo "| Commits | ${{ steps.collect-insights.outputs.commits }} |" >> README.md
-          echo "| Contributors | ${{ steps.collect-insights.outputs.contributors }} |" >> README.md
-          echo "| Traffic Views (Yesterday) | ${{ steps.collect-insights.outputs.traffic_views }} |" >> README.md
-          echo "| Unique Traffic Views (Yesterday) | ${{ steps.collect-insights.outputs.traffic_uniques }} |" >> README.md
-          echo "| Clones (Yesterday) | ${{ steps.collect-insights.outputs.clones_count }} |" >> README.md
-          echo "| Unique Clones (Yesterday) | ${{ steps.collect-insights.outputs.clones_uniques }} |" >> README.md
-
-      - name: Commit and push changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add README.md
-          git commit -m "Update repository stats" -a || echo "No changes to commit"
-          git push
+          ghtoken: ${{ secrets.TOKEN }}
