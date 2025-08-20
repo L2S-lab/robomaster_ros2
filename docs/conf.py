@@ -61,7 +61,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Robmaster ROS 2'
+project = 'RoboMaster ROS 2'
 copyright = '2024 Aarsh Thakker (CentraleSupélec), and contributors'
 author = 'Aarsh Thakker'
 
