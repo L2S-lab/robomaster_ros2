@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>How To &mdash; Robmaster ROS 2 1.0a1 documentation</title>
+  <title>How To &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -32,7 +32,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            Robmaster ROS 2
+            RoboMaster ROS 2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -62,7 +62,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Robmaster ROS 2</a>
+          <a href="index.html">RoboMaster ROS 2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -95,13 +95,18 @@ If dynamic IP are used, enable <cite>random_assign</cite> option in the <cite>ro
 <p>Turn on the robots and switch the connection mode to <strong>router</strong> connection.</p>
 <img alt="EP Wi-Fi settings" class="align-center" src="_images/ep-wifi.png" />
 <p>Once all the drones and robots are powered on, run the following command.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>setup_wifi.launch.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>install/setup.bash
+ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>setup_wifi.launch.py
 </pre></div>
 </div>
 <p>This will connect your PC to the RMTT drones one by one and excecute the necessary commands to set up the Wi-Fi connection.</p>
 <p>The QR code will be displayed on seperate window. press the red/white small button on the side of the robot’s connection switch and scan it using the robot’s camera to connect the robot to the Wi-Fi network.</p>
 <p>Once the setup is done, drones need turn off and switch to the <strong>router</strong> (STA mode) connection mode.
 Now when the drones are powered on, they will connect to the Wi-Fi network and propeller will start spinning at low speed. This indicates the connection is successful. (It can take couple of minutes)</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can flip the drone &gt;90° to stop the propellers.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This setup procedure is generally only required once. If a drone or robot is unable to connect to the network, repeat the setup process for the specific robot/drone.</p>
@@ -112,7 +117,26 @@ Now when the drones are powered on, they will connect to the Wi-Fi network and p
 <p>Once all the drones, robots and PC are connected to the Wi-Fi network, robomaster server can be started.</p>
 <p>Check the <cite>rmtt_param.yaml</cite> and <cite>rmep_param.yaml</cite> files to ensure the parameters are set correctly for the drones and robots.</p>
 <p>Check the <cite>robomaster_server.yaml</cite> file to ensure the local IP, number of drones and robots are set correctly.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>robomaster_server.launch.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>install/setup.bash
+ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>robomaster_server.launch.py
+</pre></div>
+</div>
+<p>Launch arguments for <cite>robomaster_server.launch.py</cite>:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This values will override the parameters indicated in the <cite>robomaster_server.yaml</cite> file if num_of_drones or num_of_eps1 are non zero.</p>
+</div>
+<ul class="simple">
+<li><p><cite>num_of_drones</cite>: Number of drones to be added in the server</p></li>
+<li><p><cite>num_of_eps1</cite>: Number of eps1 to be added in the server</p></li>
+<li><p><cite>local_ip</cite>: Local IP address of the computer running the server</p></li>
+<li><p><cite>random_assign</cite>: Random assignment for drone/robot allocation</p></li>
+<li><p><cite>keyboard_cmd</cite>: Enable keyboard command control for drones</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Press &lt;alt&gt;+a to arm all the drones
+Press &lt;alt&gt;+e for an emergency call to all drones
+Press &lt;alt&gt;+l to land all drones
+Press &lt;alt&gt;+t to takeoff all drones
 </pre></div>
 </div>
 </section>

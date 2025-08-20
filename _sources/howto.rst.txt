@@ -32,6 +32,7 @@ Once all the drones and robots are powered on, run the following command.
 
 .. code-block:: bash
 
+    source install/setup.bash
     ros2 launch robomaster_ros2 setup_wifi.launch.py
 
 This will connect your PC to the RMTT drones one by one and excecute the necessary commands to set up the Wi-Fi connection. 
@@ -41,6 +42,9 @@ The QR code will be displayed on seperate window. press the red/white small butt
 
 Once the setup is done, drones need turn off and switch to the **router** (STA mode) connection mode.
 Now when the drones are powered on, they will connect to the Wi-Fi network and propeller will start spinning at low speed. This indicates the connection is successful. (It can take couple of minutes)
+
+.. tip:: 
+    You can flip the drone >90° to stop the propellers.
 
 .. note::
     This setup procedure is generally only required once. If a drone or robot is unable to connect to the network, repeat the setup process for the specific robot/drone.
@@ -56,4 +60,23 @@ Check the `robomaster_server.yaml` file to ensure the local IP, number of drones
 
 .. code-block:: bash
 
+    source install/setup.bash
     ros2 launch robomaster_ros2 robomaster_server.launch.py
+
+Launch arguments for `robomaster_server.launch.py`:
+
+.. note:: 
+    This values will override the parameters indicated in the `robomaster_server.yaml` file if num_of_drones or num_of_eps1 are non zero.
+
+- `num_of_drones`: Number of drones to be added in the server
+- `num_of_eps1`: Number of eps1 to be added in the server
+- `local_ip`: Local IP address of the computer running the server
+- `random_assign`: Random assignment for drone/robot allocation
+- `keyboard_cmd`: Enable keyboard command control for drones
+
+.. code-block:: text
+
+    Press <alt>+a to arm all the drones
+    Press <alt>+e for an emergency call to all drones
+    Press <alt>+l to land all drones
+    Press <alt>+t to takeoff all drones

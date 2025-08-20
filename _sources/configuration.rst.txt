@@ -125,7 +125,7 @@ setup_wifi.yaml
 
     # use only provided numbers in form of the list to modify the details
     # [0] if you don't use drones
-    UPDATE: [8,6]
+    UPDATE: [1,2,3]
 
     # For EP/S1 robots, you have to connect manually scanning a QR code. 
     # It will dispaly the QR code at end and save the image in the base directory 
