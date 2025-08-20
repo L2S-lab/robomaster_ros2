@@ -1,0 +1,5 @@
+# MoveArm.srv
+float64 x #0-0.22
+float64 z #0-0.15
+---
+bool success

@@ -1,0 +1,21 @@
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    config = os.path.join(
+      get_package_share_directory('robomaster_ros2'),
+      'config_ros',
+      'retrive_robot_info.yaml'
+      )
+
+    return LaunchDescription([
+        Node(
+            package='robomaster_ros2',
+            executable='retrive_robot_info',
+            name='retrive_robot_info',
+            parameters=[config],
+            output='screen',
+        ),
+    ])

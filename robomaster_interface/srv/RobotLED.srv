@@ -1,0 +1,9 @@
+# LED service for EP/S1 robots
+bool on                # on/off led
+string which           # which led to work on ["all", "front", "back", "left", "right"]
+std_msgs/ColorRGBA led # set led color (r,g,b)
+string effect          # effect on the led ["none","flash", "breath"]
+int8 freq              # frequency of flashing
+---
+string message         # return message
+bool success           # return true if command is successful

@@ -1,0 +1,44 @@
+param_server:
+  ros__parameters:
+    rmtt:
+      mled_display_num: True         # whether to display the number of the drone on the mled  on initalisation
+      external_position: False       # (WIP) whether to use external positioning system such as mocap
+      drone_name_list:               # list of names of all the drones that you want to add now or in future (mandatory)
+        - rmtt_1   
+        - rmtt_2  
+        - rmtt_3
+
+      pub_front_tof: False           # (Too heavy on process, avoid using with multi drones) whether to publish front tof sensor data
+      pub_bottom_tof: True          # whether to publish bottom tof sensor data
+      pub_attitude: True            # whether to publish attitude data
+      pub_barometer: False           # (WIP units issue) 
+      pub_imu: False                 # (WIP units issue) 
+      pub_mpad: False                # Publish info of mission pad below the drone
+
+  #####MANDATORY#####
+  # Individual drone configurations and parameter control for all the drones
+  # name in the list should be the same as the name in the drone_name_list
+  # topic_type: Pose/ PoseStamped/ Point/ PointStamped
+      rmtt_1:
+        ip: "192.168.0.151"
+        pub_cam: False
+        cam_direction: 0             # 0: forward, 1: down
+        yaw_hold: False              # WIP
+        ext_pose_topic_type: PoseStamped
+        ext_pose_topic_name: /rmtt_1/pose
+
+      rmtt_2:
+        ip: "192.168.0.152"
+        pub_cam: False
+        cam_direction: 0             # 0: forward, 1: down
+        yaw_hold: False              # WIP
+        ext_pose_topic_type: PoseStamped
+        ext_pose_topic_name: /rmtt_2/pose
+
+      rmtt_3:
+        ip: "192.168.0.153"
+        pub_cam: False
+        cam_direction: 0             # 0: forward, 1: down
+        yaw_hold: False              # WIP
+        ext_pose_topic_type: PoseStamped
+        ext_pose_topic_name: /rmtt_3/pose

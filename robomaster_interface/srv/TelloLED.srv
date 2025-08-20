@@ -1,0 +1,8 @@
+# Can not use freq and blink at the same time
+std_msgs/ColorRGBA led   # set led color (r,g,b)
+float32 breath           # set led to breath pattern at frequency (Hz) [0.1,2.5]
+float32 blink            # set led to blink pattern at frequency (Hz) [0.1,10.0]
+std_msgs/ColorRGBA led2  # set 2nd led color to blink (r,g,b)
+---
+string message           # return message
+bool success             # return true if command is successful

@@ -1,0 +1,4 @@
+float64 height    # height in meters (0.8-5.0)
+bool sync false   # true for sync, false for async
+---
+bool success

@@ -1,0 +1,5 @@
+string name     # remove robot by name
+string type     # remove robot by type ['rmtt', 'rmep']
+---
+bool success    # return true if the robot is removed successfully
+string message  # return message

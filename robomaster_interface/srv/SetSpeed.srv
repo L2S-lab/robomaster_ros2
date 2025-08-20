@@ -1,0 +1,4 @@
+float64 speed    # Max speed of the drone in m/s in range [0.1,1]
+---
+bool success     # True if the speed was set successfully
+string message   # Message from the drone

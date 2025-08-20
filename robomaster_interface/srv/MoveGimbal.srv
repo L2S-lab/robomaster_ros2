@@ -1,0 +1,7 @@
+# MoveArm.srv
+float64 pitch
+float64 yaw
+float64 pitch_speed
+float64 yaw_speed
+---
+bool success
