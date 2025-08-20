@@ -1,0 +1,4 @@
+float32 pitch_angle
+float32 yaw_angle
+float32 pitch_ground_angle
+float32 yaw_ground_angle

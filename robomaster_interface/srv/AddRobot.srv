@@ -1,0 +1,5 @@
+string name     # name of the robot  
+string ip       # ip of the robot
+---
+bool success    # return true if the robot is added successfully
+string message  # return message

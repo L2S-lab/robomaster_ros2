@@ -1,0 +1,8 @@
+# MoveChassis.srv
+float64 x
+float64 y
+float64 w
+float64 xy_speed
+float64 w_speed
+---
+bool success

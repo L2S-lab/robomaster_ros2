@@ -1,0 +1,13 @@
+# graph is 64 bit string with values 0, r, b, p
+# for an example, '000000000r0000r0r0r00r0r000000000000000000r00r00000rr00000000000'
+# you can add your input in the yaml file to permenently store it with a name
+
+int16 brightness        # 0-255
+string color            # 'r', 'b', 'p' (red, blue, purple/pink)
+string mled_char        # 0-9, A-Z, a-z, 'heart', 'smile', smile2, 'ok', 'star', 'question', 'stop', 'exclamation', 'double_exclamation'
+string graph            # custom char display input with 64 bits with 0,r,b,p 
+string scroll_dir       # 'l', 'r', 'u', 'd' (left, right, up, down)
+float32 freq            # set scroll at frequency (Hz) [0.1,2.5]
+---
+string message          # return message
+bool success            # return true if command is successful

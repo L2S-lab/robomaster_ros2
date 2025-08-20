@@ -1,0 +1,3 @@
+int32 distance # close at 0%, 25%, 50%, 75%, 100%
+---
+bool success

@@ -1,0 +1,4 @@
+string direction # Direction of movement [UP, DOWN, LEFT, RIGHT, FORWARD, BACKWARD]
+float64 distance # Distance of movement in meters
+---
+bool success     # Indicate if the movement was successful
