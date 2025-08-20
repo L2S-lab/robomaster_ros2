@@ -1,0 +1,12 @@
+robomaster_server:
+  ros__parameters:
+    local_ip: "192.168.0.106"      # local ip of the network on which drones are connected
+    num_of_drones: 0               # number of drones to be used 
+    num_of_eps1: 0                 # numebr of EP or S1 Robots to be used
+    random_assign: True            # whether to assign drones and robot numbers randomly (Ascending order of IPs last octet)
+
+
+
+
+
+    

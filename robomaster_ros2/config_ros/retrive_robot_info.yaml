@@ -1,0 +1,8 @@
+retrive_robot_info:
+  ros__parameters:
+    # number of drones connected to network (0 if you are not using any)
+    RMTT: 1
+
+    # number of EP/S1 robots connected to network (0 if you are not using any)
+    EP: 0
+    

@@ -1,0 +1,32 @@
+param_server:
+  ros__parameters:
+    rmep:
+      led_num: False                 # whether to display specific led pattern for specific number (R1,R2,R3,R4,G1,G2,G3,G4,B1,B2,B3,B4) etc for 1 to 12
+      external_position: False       # (WIP) whether to use external positioning system such as mocap 
+      robot_name_list:               # list of names of the robots (mandatory)
+        - rmep_1   
+        - rmep_2  
+        - rmep_3
+        - rmep_4
+
+      # WIP (Work in Progress) not working now
+      pub_imu: False                 # (WIP units issue)
+      pub_cam: False                 # (WIP units issue)
+      pub_marker: False              # WIP
+      pub_armpose: True              # Publish arm pose of the robot
+
+  # Individual robot configurations and parameter control
+  # name in the list should be the same as the name in the robot_name_list
+  # mandatory while usuing external position
+  # topic_type: Pose/ PoseStamped/ Point/ PointStamped
+      rmep_1:
+        ip: "192.168.0.161"
+        pub_cam: False # WIP
+        ext_pose_topic_type: PoseStamped
+        ext_pose_topic_name: /rmep_1/pose
+
+      rmep_2:
+        ip: "192.168.0.162"
+        pub_cam: False # WIP
+        ext_pose_topic_type: PoseStamped
+        ext_pose_topic_name: /rmep_2/pose

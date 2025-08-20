@@ -1,0 +1,38 @@
+setup_wifi:
+  ros__parameters:
+    # ssid of the router that you want all robots to connect
+    SSID: "Voliere"
+
+    # password of the router that you want to connect
+    # can be "-1" to retrive the password from the saved network 
+    # OR "None" if there is no password
+    PSK: "-1"
+
+    # use only provided numbers in form of the list to modify the details
+    # [0] if you don't use drones
+    UPDATE: [1,2,3]
+
+    # For EP/S1 robots, you have to connect manually from QR code. It will dispaly the QR code at end
+    EP: False
+
+    drone_list:
+      #pwd: password of all the tello if they are the same, 
+      # use n#>pwd if there is different passwords or "None" if there is no password
+      pwd: "12341234"
+    # n+number:
+    #   ssid: ssid of the tello hotspot
+    #   pwd: password associated with the above ssid ('' for no password)
+      n1:
+        ssid: "RMTT-1"
+        pwd: "12341234"
+
+      n2:
+        ssid: "RMTT-2"
+        pwd: "12341234"
+
+      n3:
+        ssid: "RMTT-3"
+        pwd: "12341234"
+
+
+    

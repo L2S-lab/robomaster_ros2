@@ -1,0 +1,19 @@
+#param_server:
+#  ros__parameters:
+nb_robots: 3
+robot_list:
+  ROBOT1:
+    IP: 192.168.1.32
+    SN: CSE465DFVOOWAF
+    name: rmep_1
+    type: EP_S1
+  ROBOT2:
+    IP: 192.168.1.38
+    SN: CEV486DFVOOVWF
+    name: rmep_2
+    type: EP_S1
+  ROBOT3:
+    IP: 192.168.1.40
+    SN: CEX995DFVOOVCE
+    name: rmtt_1
+    type: TT

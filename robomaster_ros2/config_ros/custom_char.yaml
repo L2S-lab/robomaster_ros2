@@ -1,0 +1,24 @@
+# You can put your custom characters here with the following format.
+# Replace bits with the color you want to put at that pixel
+# 0: off, r: red, b: blue, p:purple
+# smile:
+# 0 0 ∎ ∎ ∎ ∎ 0 0
+# 0 ∎ 0 0 0 0 ∎ 0
+# ∎ 0 ∎ 0 0 ∎ 0 ∎
+# ∎ 0 0 0 0 0 0 ∎
+# ∎ 0 ∎ 0 0 ∎ 0 ∎
+# ∎ 0 0 ∎ ∎ 0 0 ∎
+# 0 ∎ 0 0 0 0 ∎ 0
+# 0 0 ∎ ∎ ∎ ∎ 0 0
+# https://xantorohara.github.io/led-matrix-editor/
+# for single color, use only 'r', you can change the color from service call
+
+smile: '00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00'
+smile2: '000000000b0000b0b0b00b0b000000000000000000r00r00000rr00000000000'
+ok: '000000000000000r000000r000000r00r000r0000r0r000000r0000000000000'
+star: '000000000rr00rr000rrrr00rrrrrrrr00rrrr000rr00rr00000000000000000'
+question: '00rrrr000rr00rr000000rr00000rr00000rr00000000000000rr00000000000'
+stop: '0000000000rrrr000rr000r00r0r00r00r00r0r00r000rr000rrrr0000000000'
+exclamation: '000rr00000rrrr0000rrrr00000rr000000rr00000000000000rr00000000000'
+double_exclamation: '0rr00rr00rr00rr00rr00rr00rr00rr0000000000rr00rr00rr00rr000000000'
+heart: '0000000000r00r000rrrrrr00rrrrrr00rrrrrr000rrrr00000rr00000000000'
