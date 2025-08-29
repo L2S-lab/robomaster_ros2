@@ -1,0 +1,38 @@
+import: []    # import lib other than numpy (optional)
+time: t           # time variable if it is used in the equations (optional)
+duration: 40      # Excecution time time (necessary) (use np.inf for infinite time but it is not recommended)  
+
+x1: 1.0*np.cos(0.5*t)
+y1: 1.2*np.sin(0.5*t)
+z1: 1.0+(0.5*np.sin(0.2*t))
+vx1: -1.0*0.5*np.sin(0.5*t)
+vy1: 1.2*0.5*np.cos(0.5*t)
+vz1: 0.5*0.2*np.cos(0.2*t) 
+
+x2: 1.0*np.cos(0.5*t+np.pi)
+y2: 1.2*np.sin(0.5*t+np.pi)
+z2: 1.0+(0.5*np.sin(0.2*t))
+vx2: -1.0*0.5*np.sin(0.5*t+np.pi)
+vy2: 1.0*0.5*np.cos(0.5*t+np.pi)
+vz2: 0.5*0.2*np.cos(0.2*t) 
+
+x3: 0
+y3: 0
+z3: 1.0+(0.5*np.sin(0.2*t))
+vx3: 0
+vy3: 0
+vz3: 0.5*0.2*np.cos(0.2*t) 
+
+x4: 1.5*np.cos(0.7*t+np.pi/2)
+y4: 1.7*np.sin(0.7*t+np.pi/2)
+z4: 1+(0.7*np.sin(0.2*t))
+vx4: -0.7*1.5*np.sin(0.7*t+np.pi/2)
+vy4: 0.7*1.7*np.cos(0.7*t+np.pi/2)
+vz4: 0.7*0.2*np.cos(0.2*t)
+
+x5: 1.5*np.cos(0.7*t+3*np.pi/2)
+y5: 1.7*np.sin(0.7*t+3*np.pi/2)
+z5: 1+(0.7*np.sin(0.2*t))
+vx5: -0.7*1.5*np.sin(0.7*t+3*np.pi/2)
+vy5: 0.7*1.7*np.cos(0.7*t+3*np.pi/2)
+vz5: 0.7*0.2*np.cos(0.2*t)
