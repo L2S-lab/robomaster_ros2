@@ -9,41 +9,49 @@ Command line
 Drones
 ^^^^^^
 - Takeoff all the connected drones
+
 .. code-block:: bash
 
    ros2 service call /takeoff_all std_srvs/srv/Trigger "{}"
 
 - Land all the connected drones
+
 .. code-block:: bash
 
    ros2 service call /land_all std_srvs/srv/Trigger "{}"
 
 - Takeoff individual drones
+
 .. code-block:: bash
 
    ros2 service call /drone_1/takeoff robomaster_interface/srv/Takeoff "{height: 0.0}"
 
 - Land individual drones
+
 .. code-block:: bash
 
    ros2 service call /drone_1/land std_srvs/srv/Trigger "{}"
 
 - Soft emergency landing
+
 .. code-block:: bash
 
    ros2 service call /drone_1/soft_emergency std_srvs/srv/Trigger "{}"
 
 - Emergency shutdown
+
 .. code-block:: bash
 
    ros2 service call /drone_1/emergency std_srvs/srv/Empty "{}"
 
 - Reboot drone
+
 .. code-block:: bash
 
     ros2 service call /drone_1/reboot std_srvs/srv/Empty "{}"
 
 - Add drone to the server
+
 .. code-block:: bash
 
     ros2 service call /add_drone robomaster_interface/srv/AddDrone "
@@ -52,16 +60,13 @@ Drones
     "
 
 - Remove drone from the server
+
 .. code-block:: bash
 
     ros2 service call /remove_drone robomaster_interface/srv/RemoveRobot "
     name: <drone_name_str>
     type: 'rmtt'
     "
-
-
-
-
 
 
 
