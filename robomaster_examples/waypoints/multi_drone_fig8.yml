@@ -1,0 +1,17 @@
+import: []    # import lib other than numpy (optional)
+time: t           # time variable if it is used in the equations (optional)
+duration: 30      # Excecution time time (necessary) (use np.inf for infinite time but it is not recommended)
+
+x1: 0
+y1: 0.0+0.5*np.sin(0.4*t)
+z1: 1.2 + 0.4*np.cos(0.2*t)
+vx1: 0
+vy1: 0.5*0.4*np.cos(0.4*t)
+vz1: -0.4*0.2*np.sin(0.2*t)
+
+x2: 0
+y2: -2.0+0.5*np.sin(0.4*t)
+z2: 1.2 + 0.4*np.cos(0.2*t)
+vx2: 0
+vy2: 0.5*0.4*np.cos(0.4*t)
+vz2: -0.4*0.2*np.sin(0.2*t)
