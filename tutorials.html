@@ -48,7 +48,14 @@
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#command-line">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drones">Drones</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#control-drones-with-external-positioning-system">Control drones with external positioning system</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 
@@ -78,6 +85,195 @@
              
   <section id="tutorials">
 <span id="id1"></span><h1>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading"></a></h1>
+<section id="command-line">
+<h2>Command line<a class="headerlink" href="#command-line" title="Link to this heading"></a></h2>
+<section id="drones">
+<h3>Drones<a class="headerlink" href="#drones" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Takeoff all the connected drones</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/takeoff_all<span class="w"> </span>std_srvs/srv/Trigger<span class="w"> </span><span class="s2">&quot;{}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Land all the connected drones</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/land_all<span class="w"> </span>std_srvs/srv/Trigger<span class="w"> </span><span class="s2">&quot;{}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Takeoff individual drones</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/drone_1/takeoff<span class="w"> </span>robomaster_interface/srv/Takeoff<span class="w"> </span><span class="s2">&quot;{height: 0.0}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Land individual drones</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/drone_1/land<span class="w"> </span>std_srvs/srv/Trigger<span class="w"> </span><span class="s2">&quot;{}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Soft emergency landing</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/drone_1/soft_emergency<span class="w"> </span>std_srvs/srv/Trigger<span class="w"> </span><span class="s2">&quot;{}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Emergency shutdown</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/drone_1/emergency<span class="w"> </span>std_srvs/srv/Empty<span class="w"> </span><span class="s2">&quot;{}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Reboot drone</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/drone_1/reboot<span class="w"> </span>std_srvs/srv/Empty<span class="w"> </span><span class="s2">&quot;{}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Add drone to the server</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/add_drone<span class="w"> </span>robomaster_interface/srv/AddDrone<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">name: &lt;drone_name_str&gt;</span>
+<span class="s2">ip: &lt;drone_ip_str&gt;</span>
+<span class="s2">&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Remove drone from the server</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/remove_drone<span class="w"> </span>robomaster_interface/srv/RemoveRobot<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">name: &lt;drone_name_str&gt;</span>
+<span class="s2">type: &#39;rmtt&#39;</span>
+<span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="control-drones-with-external-positioning-system">
+<h2>Control drones with external positioning system<a class="headerlink" href="#control-drones-with-external-positioning-system" title="Link to this heading"></a></h2>
+<p>Drones have velocity command that can be used to control the drone. However, to use this command, the controller needs to know drone’s current position. This can be achieved by using an external positioning system such as Vicon or OptiTrack. The following example shows how to use the external positioning system to control the drone’s position with simple PID control.</p>
+<p>More complex examples are included in the <cite>robomaster_examples</cite> package.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">std_srvs.srv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trigger</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">tf2_ros.transform_listener</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformListener</span><span class="p">,</span> <span class="n">Buffer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geometry_msgs.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">Twist</span>
+
+<span class="n">KP</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.75</span><span class="p">]</span> <span class="c1">#[0.6,0.6,0.75]</span>
+<span class="n">KI</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]</span><span class="c1">#[0.0001,0.0001,0.00001]</span>
+<span class="n">KD</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]</span><span class="c1">#[0.0001,0.0001,0.000001]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Waypoints</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="c1"># First takeoff the drone before running the script</span>
+<span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s1">&#39;waypoints&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">world_frame</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tf_frame</span> <span class="o">=</span> <span class="s2">&quot;rmtt_1&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">robot_name</span> <span class="o">=</span> <span class="s2">&quot;rmtt_1&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">tfBuffer</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tfListener</span> <span class="o">=</span> <span class="n">TransformListener</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tfBuffer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pubCmdVel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Twist</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">robot_name</span><span class="si">}</span><span class="s1">/cmd_vel&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">land_client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span><span class="n">Trigger</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">robot_name</span><span class="si">}</span><span class="s1">/land&#39;</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">land_client</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="n">timeout_sec</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;land service not available, waiting again...&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">Iterm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">e_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">land_req</span> <span class="o">=</span> <span class="n">Trigger</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_loop</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_frame</span><span class="p">,</span> <span class="n">target_frame</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tfBuffer</span><span class="o">.</span><span class="n">lookup_transform</span><span class="p">(</span><span class="n">source_frame</span><span class="p">,</span> <span class="n">target_frame</span><span class="p">,</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">())</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">send_land_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">land_client</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">land_req</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Land request sent!&#39;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">control_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">time_since_last_call</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1e9</span>
+    <span class="k">if</span> <span class="n">dt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="c1"># Avoid division by zero on the first call</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">world_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_frame</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Could not get transform: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">current_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translation</span><span class="o">.</span><span class="n">z</span>
+    <span class="p">])</span>
+
+    <span class="n">target_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">error_pos</span> <span class="o">=</span> <span class="n">target_pos</span> <span class="o">-</span> <span class="n">current_pos</span>
+
+    <span class="c1"># --- PID Calculation for each axis ---</span>
+    <span class="c1"># Proportional</span>
+    <span class="n">p_term</span> <span class="o">=</span> <span class="n">KP</span> <span class="o">*</span> <span class="n">error_pos</span>
+
+    <span class="c1"># Integral</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Iterm</span> <span class="o">+=</span> <span class="n">error_pos</span> <span class="o">*</span> <span class="n">dt</span>
+    <span class="n">i_term</span> <span class="o">=</span> <span class="n">KI</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Iterm</span>
+
+    <span class="c1"># Derivative</span>
+    <span class="n">d_term</span> <span class="o">=</span> <span class="n">KD</span> <span class="o">*</span> <span class="p">(</span><span class="n">error_pos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_prev</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span>
+
+    <span class="c1"># Update previous error</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">e_prev</span> <span class="o">=</span> <span class="n">error_pos</span>
+
+    <span class="c1"># --- Calculate velocity command ---</span>
+    <span class="n">pid_result</span> <span class="o">=</span> <span class="n">p_term</span> <span class="o">+</span> <span class="n">i_term</span> <span class="o">+</span> <span class="n">d_term</span>
+
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">Twist</span><span class="p">()</span>
+    <span class="c1"># Clamp the output velocity to a safe range</span>
+    <span class="n">cmd</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pid_result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">cmd</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pid_result</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">cmd</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pid_result</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pubCmdVel</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+    <span class="c1"># --- Waypoint switching logic ---</span>
+    <span class="n">dist_to_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">error_pos</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dist_to_target</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Reached waypoint </span><span class="si">{</span><span class="n">target_pos</span><span class="si">}</span><span class="s1">, distance: </span><span class="si">{</span><span class="n">dist_to_target</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">m&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Reset PID state to prevent integral windup from affecting the next waypoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Iterm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;All waypoints reached. Landing...&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_land_request</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">waypoints</span> <span class="o">=</span> <span class="n">Waypoints</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin</span><span class="p">(</span><span class="n">waypoints</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="n">waypoints</span><span class="o">.</span><span class="n">send_land_request</span><span class="p">()</span>
+        <span class="k">pass</span>
+    <span class="n">waypoints</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+    <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
