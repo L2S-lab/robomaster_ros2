@@ -68,7 +68,11 @@ Drones
     type: 'rmtt'
     "
 
+Axis of the drone is Z-up, Y-left, X-forward, as shown in the image below.
 
+.. image:: images/drone_axis.png
+    :align: center
+    :alt: Axis of the drone
 
 Control drones with external positioning system
 -----------------------------------------------
