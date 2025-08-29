@@ -76,6 +76,7 @@ Launch arguments for `robomaster_server.launch.py`:
 
 .. code-block:: text
 
+    Keyboard commands:
     Press <alt>+a to arm all the drones
     Press <alt>+e for an emergency call to all drones
     Press <alt>+l to land all drones
