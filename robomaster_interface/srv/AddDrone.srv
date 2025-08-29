@@ -1,7 +1,7 @@
 string name                 # name of the robot  
 string ip                   # ip of the robot
-bool cam                    # camera publishing
-int16 cam_direction         # direction of cam 0 front 1 bottom
+bool cam false                   # camera publishing
+int16 cam_direction 0        # direction of cam 0 front 1 bottom
 string ext_pose_topic_name  # external pose topic name
 string ext_pose_topic_type  # external pose topic type Pose/ PoseStamped/ Point/ PointStamped
 ---
