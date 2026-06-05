@@ -729,9 +729,11 @@ class Drone():
             proto.text_cmd = cmd
             msg = protocol.TextMsg(proto)
             while retry > 0 and self.tof_data <0.3:
-                logger.info(f"[{self._conf._name}] takeoff {retry}, tof_data: {self.tof_data}")
-                if self.tof_data > 0.3:
-                        return True
+                logger.info(f"[{self._conf._name}] takeoff, tof_data: {self.tof_data}")
+                if self.tof_data > 0.12:
+                    self.stop(retry=1)
+                    self._set_led(r=0,g=255,b=0, async_flag=True)
+                    return True
                 if async_flag:  
                     self._client.send_async_msg(msg)
                     time.sleep(1)
@@ -747,8 +749,9 @@ class Drone():
                         if proto.resp == 'ok': return True 
                     logger.warning(f"[{self._conf._name}] [takeoff] failed. retrying...")
                     retry -= 2
-            if self.tof_data > 0.3:
-                self.stop()
+            if self.tof_data > 0.12:
+                self.stop(retry=1)
+                self._set_led(r=0,g=255,b=0, async_flag=True)
                 return True
             return False
         else:
@@ -818,7 +821,9 @@ class Drone():
                     resp_msg = None
                 if resp_msg and (proto := resp_msg.get_proto()):
                     logger.info(f"[{self._conf._name}] land, ret: {proto.resp}")
-                    if proto.resp == 'ok': return True 
+                    if proto.resp == 'ok': 
+                        self.state = State.Idle
+                        return True
                 logger.warning(f"[{self._conf._name}] [land] failed. retrying...")
                 retry -= 2
                 time.sleep(0.1)

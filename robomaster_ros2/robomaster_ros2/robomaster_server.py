@@ -1,5 +1,7 @@
 import rclpy
+#import rclpy.client
 from rclpy.node import Node
+#from rclpy.node import Client as rclpy_client
 from rclpy.task import Future
 from rclpy import Parameter
 from rclpy.executors import MultiThreadedExecutor
@@ -29,7 +31,6 @@ class RobomasterServer(Node):
         super().__init__('robomaster_server',
                         allow_undeclared_parameters=True,
                         start_parameter_services=True,)
-        # This is used for temporary media storage
         if os.path.exists(os.getcwd()+'/.tmp'):
             os.system('rm -rf '+os.getcwd()+'/.tmp')
 
@@ -323,83 +324,23 @@ class RobomasterServer(Node):
                 self.remaining.remove(drone_name)
             
     def takeoff_all(self, request, response: Trigger.Response):
+        threads = []
         for drone in self.all_drones.values():
-            drone._takeoff(async_flag=True, retry=5)
-        # self.remaining = []
-        # self.takeoff_cli: Dict [str,rclpy_client]= {}
-        # self.takeoff_future: Dict [str,Future]= {}
-        # self.land_cli: Dict [str,rclpy_client]= {}
-        # self.land_future: Dict [str,Future]= {}
-        # self.remaining = list(self.all_drones.keys())
-        # for drone in self.all_drones.keys():
-        #     self.takeoff_cli[drone] = self.create_client(Takeoff, f'{drone}/takeoff')
-        #     self.land_cli[drone] = self.create_client(Trigger, f'{drone}/land')
-        #     if not self.takeoff_cli[drone].wait_for_service(timeout_sec=1.0) \
-        #             or not self.land_cli[drone].wait_for_service(timeout_sec=1.0):
-        #         response.success = False
-        #         response.message = f'{drone} service not available, waiting again...'
-        #         return response
-        # takeoff_req = Takeoff.Request()
-        # takeoff_req.height = 0.0
-        # for drone in self.all_drones.keys():
-        #     self.send_takeoff_request(takeoff_req, drone)
-        # start_time = time.time()
-        # while len(self.remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Takeoff failed for drones {self.remaining}'
-        #         return response
-        #     time.sleep(0.1)
-        # response.message = 'All drones take off done'
-        # response.success = True
-        
-        
-        # self.remaining = list(self.all_drones.keys())
-        # while len(remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Takeoff failed for drones {remaining}'
-        #         return response
-        #     for i in remaining:
-        #         ret = self.all_drones[i]._takeoff(async_flag=True, retry=3)
-        #         if ret:
-        #             remaining.remove(i)
-        #             time.sleep(0.5)
-        # response.message = 'All drones take off done'
-        # response.success = True
+            t = threading.Thread(target=drone._takeoff, kwargs={'async_flag': True, 'retry': 5})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
         return response
     
     def land_all(self, request, response:Trigger.Response):
+        threads = []
         for drone in self.all_drones.values():
-            drone._land(async_flag=True)
-        # self.remaining = []
-        # self.remaining = list(self.all_drones.keys())            
-        # land_req = Trigger.Request()
-        # for drone in self.all_drones.keys():
-        #     self.send_land_request(land_req, drone)
-        # start_time = time.time()
-        # while len(self.remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Land failed for drones {self.remaining}'
-        #         return response
-        #     time.sleep(0.1)
-        # response.message = 'All drones land done'
-        # response.success = True
-        
-        # remaining = list(self.all_drones.keys())
-        # while len(remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Land failed for drones {remaining}'
-        #         return response
-        #     for i in remaining:
-        #         ret = self.all_drones[i]._land(async_flag=False, retry=3)
-        #         if ret:
-        #             remaining.remove(i)
-        #             time.sleep(0.5)
-        # response.message = 'All drones land done'
-        # response.success = True
+            t = threading.Thread(target=drone._land, kwargs={'async_flag': True, 'retry': 5})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
         return response
     
     def close_all(self):
@@ -422,24 +363,41 @@ class RobomasterServer(Node):
     def on_activate_t(self):
         if self.armed:
             self.pause_keyboard()
+            threads = []
             for drone in self.all_drones.values():
-                drone._takeoff(async_flag=True, retry=3)
+                t = threading.Thread(target=drone._takeoff, kwargs={'async_flag': True, 'retry': 3})
+                t.start()
+                threads.append(t)
+            for t in threads:
+                t.join()
             self.resume_keyboard()
         else:
             self.get_logger().info("Drone is not armed, please press 'alt+a' to arm")
     @hotkey_callback
     def on_activate_l(self):
         self.pause_keyboard()
+        threads = []
         for drone in self.all_drones.values():
-            drone._land(async_flag=True, retry=3)
+            drone.stop(retry=1)
+            t = threading.Thread(target=drone._land, kwargs={'async_flag': True, 'retry': 3})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
         self.armed = False
         self.resume_keyboard()
     @hotkey_callback
     def on_activate_e(self):
         self.pause_keyboard()
         self.armed = False
+        threads = []
         for drone in self.all_drones.values():
-            drone._emergency(async_flag=True, retry=5)
+            drone.stop(retry=1)
+            t = threading.Thread(target=drone._emergency, kwargs={'async_flag': True, 'retry': 5})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
         self.resume_keyboard()
     @hotkey_callback
     def on_activate_a(self):
@@ -456,7 +414,7 @@ class RobomasterServer(Node):
     def run_hotkeys(self):
         self.hotkeys.start()
         self.hotkeys.join()
-        
+
 def main(args=None):
     rclpy.init(args=args)
 
