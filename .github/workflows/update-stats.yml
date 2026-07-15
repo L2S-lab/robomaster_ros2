@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: run-ghrs
-        # Use latest release.
-        uses: jgehrcke/github-repo-stats@RELEASE
+        # Pin to latest main branch commit (newer Docker base image with Chrome
+        # that correctly renders Vega-Lite SVG charts for PDF generation).
+        uses: jgehrcke/github-repo-stats@ff48771cbb4324c3b77490bbfc26d6a5f3831cdb
         with:
           ghtoken: ${{ secrets.TOKEN }}
