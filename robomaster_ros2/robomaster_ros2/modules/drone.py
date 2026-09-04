@@ -1,13 +1,21 @@
 import socket, threading, collections
 import time
 from math import radians
+import cv2
 
-from numpy import array, pi
+from numpy import pi
 
 from rclpy.node import Node
 #from std_msgs.msg import String
-from std_srvs.srv import Trigger, Empty
-from robomaster_interface.srv import Takeoff, GoTo, Move, SetSpeed, TelloLED, TelloMled 
+from std_srvs.srv import Trigger, Empty, SetBool
+from robomaster_interface.srv import (
+    GoTo,
+    Move,
+    SetSpeed,
+    Takeoff,
+    TelloLED,
+    TelloMled,
+)
 from robomaster_interface.msg import TelloMpad
 from geometry_msgs.msg import Twist, TwistStamped
 from geometry_msgs.msg import PoseStamped, Pose, Point, PointStamped
@@ -19,10 +27,23 @@ from sensor_msgs.msg import Image
 from tf_transformations import quaternion_from_euler
 from cv_bridge import CvBridge, CvBridgeError
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.qos import (
+    DurabilityPolicy,
+    HistoryPolicy,
+    QoSProfile,
+    ReliabilityPolicy,
+)
 
 
 from rclpy.logging import get_logger
 logger = get_logger('drone')
+
+CAMERA_QOS = QoSProfile(
+    history=HistoryPolicy.KEEP_LAST,
+    depth=1,
+    reliability=ReliabilityPolicy.BEST_EFFORT,
+    durability=DurabilityPolicy.VOLATILE,
+)
 
 try:
     from . import protocol, config, dds
@@ -30,12 +51,14 @@ try:
     from . custom_char import get_custom_char, valid_custom_char
     from .common import *
     from .globals import *
+    from .motion_safety import MotionSafety
 except ImportError as e:
     import protocol, config, dds
     import media
     from custom_char import get_custom_char, valid_custom_char
     from common import *
     from globals import *
+    from motion_safety import MotionSafety
 except Exception as e:
     logger.error(f"Import Error pass two: {e}")
 
@@ -367,6 +390,7 @@ class TextClient(object):
 class Drone():
     def __init__(self, node:Node=None, conf=config.te_conf, cli:TextClient=None, params:dict=None):
         super().__init__()
+        params = params or {}
         self._conf = conf
         self._client = cli
         self._video_conn = None
@@ -375,6 +399,7 @@ class Drone():
         self._sock_vdo = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.me_cbg = MutuallyExclusiveCallbackGroup()
         self.rnt_cbg = ReentrantCallbackGroup()
+        self.camera_cbg = MutuallyExclusiveCallbackGroup()
 
         self.state = State.Idle
         self.ext_tof_pub = None     # publisher sensor_msgs/Range
@@ -399,6 +424,20 @@ class Drone():
         self.bat = None             # data float
         self.vel_factor = 1.0       # default speed set to 1.0 m/s
         self.yaw_hold = False       # hold initial yaw angle using imu and mission pad data
+        self.camera_publish_fps = float(
+            params.get("camera_publish_fps", 20.0)
+        )
+        self.camera_direction = int(params.get("cam_direction", 0))
+        self._motion_lock = threading.RLock()
+        self._safety_require_arm = bool(
+            params.get("safety_require_arm", False)
+        )
+        self.motion_safety = MotionSafety(
+            default_timeout=params.get("safety_command_timeout", 0.5),
+            initially_armed=not self._safety_require_arm,
+            latch_deadman=params.get("safety_latch_deadman", False),
+        )
+        self._safety_timer = None
         
         if self.node is not None:
             # ROS services
@@ -414,12 +453,25 @@ class Drone():
             self.set_mled_srv = self.node.create_service(TelloMled, 'set_mled', self.set_mled)
             self.reboot_srv = self.node.create_service(Empty, 'reboot', self.reboot)
             self.status_srv =  self.node.create_service(Trigger, 'status', self.get_status)
+            self.motion_arm_srv = self.node.create_service(
+                SetBool, 'set_armed', self.set_armed
+            )
 
             # TODO 
             self.yaw_hold = params["yaw_hold"]
             
             self.cmd_vel_sub = self.node.create_subscription(Twist, 'cmd_vel', self.cmd_vel, 10,callback_group=self.me_cbg)
             #self.cmd_vel_sub = self.node.create_subscription(TwistStamped, 'cmd_vel', self.cmd_vel, 10,callback_group=self.me_cbg)
+            if self.motion_safety.default_timeout > 0.0:
+                watchdog_period = min(
+                    max(self.motion_safety.default_timeout / 2.0, 0.02),
+                    0.1,
+                )
+                self._safety_timer = self.node.create_timer(
+                    watchdog_period,
+                    self._safety_watchdog,
+                    callback_group=self.rnt_cbg,
+                )
 
             if params["ext_pose"]:
                 self.ext_pose = Pose()
@@ -496,7 +548,9 @@ class Drone():
                 self._sock_vdo.bind(self._conf._video_stream_addr)
                 self._video_conn = media.StreamConnection(sock=self._sock_vdo, robot_ip = self._conf.default_robot_addr[0])
                 self.camera = TelloCamera(self)
-                self.img_pub = self.node.create_publisher(Image, 'image', 10)
+                self.img_pub = self.node.create_publisher(
+                    Image, 'image', CAMERA_QOS
+                )
                 self.img_msg = Image()
                 self.img_timer = None
                 self.pub_strategy = "newest"
@@ -504,6 +558,43 @@ class Drone():
             #self.status_pub = self.node.create_publisher(String, 'status', 10)
             #self.sub_callback_group
             #self.ext_pose_sub
+
+    def set_motion_armed(self, armed):
+        """Set the flight-command arm state."""
+        with self._motion_lock:
+            if armed:
+                return self.motion_safety.arm()
+            self.motion_safety.disarm()
+            self._safe_hover()
+            return True
+
+    def set_armed(self, request, response:SetBool.Response):
+        """Handle the per-drone motion arming service."""
+        response.success = self.set_motion_armed(request.data)
+        if response.success:
+            state = 'armed' if request.data else 'disarmed'
+            response.message = f'Flight commands {state}.'
+        else:
+            response.message = 'Motion gate is closed and cannot be armed.'
+        return response
+
+    def _safety_watchdog(self):
+        with self._motion_lock:
+            expired = self.motion_safety.poll_deadman()
+            if 'flight' not in expired:
+                return
+            self._safe_hover()
+        suffix = ' Re-arm required.' if not self.motion_safety.armed else ''
+        logger.warning(
+            f'[{self._conf._name}] Flight deadman commanded hover.{suffix}'
+        )
+
+    def _safe_hover(self):
+        with self._motion_lock:
+            if self.state in (State.Idle, State.Landing, State.Emergency):
+                return
+            self.rc(0, 0, 0, 0)
+            self.state = State.Hover
     
     def publisher_callback(self):
         ''' 
@@ -569,30 +660,52 @@ class Drone():
             logger.error(f"[Drone] [{self._conf._name}] publisher_callback, exception: {e}")
         return data
 
-    def start_video(self, strategy="newest"):
+    def start_video(self, strategy="newest", publish_fps=None):
         '''
         strategy: "newest" or "pipeline"
         return: bool
         '''
         self.pub_strategy = strategy
+        ret = False
         if self._video_conn:
-            ret = self.camera.start_video_stream(display=False) 
+            ret = self.camera.start_video_stream(display=False)
         if ret:
-            self.img_timer = self.node.create_timer(0.05, self.img_publisher_callback, callback_group=self.me_cbg)
+            publish_fps = (
+                self.camera_publish_fps
+                if publish_fps is None else float(publish_fps)
+            )
+            if publish_fps <= 0.0:
+                logger.error(
+                    f"[Drone] [{self._conf._name}] camera publish FPS "
+                    "must be greater than zero."
+                )
+                self.camera.stop_video_stream()
+                return False
+            self.img_timer = self.node.create_timer(
+                1.0 / publish_fps,
+                self.img_publisher_callback,
+                callback_group=self.camera_cbg,
+            )
             return True
         else:
             return False
 
     def img_publisher_callback(self):
-        frame = self.camera.get_cv2_frame(strategy=self.pub_strategy)
+        frame = self.camera.get_cv2_frame(
+            timeout=0.0, strategy=self.pub_strategy
+        )
         if frame is not None:
-            logger.debug(f'frame: {frame}',once=True)
             try:
+                if (self.camera_direction == 1 and
+                        frame.shape[:2] != (240, 320)):
+                    frame = frame[:min(240, frame.shape[0]), :]
+                    frame = cv2.resize(
+                        frame, (320, 240), interpolation=cv2.INTER_AREA
+                    )
                 self.img_msg = self.bridge.cv2_to_imgmsg(frame, "bgr8")
-                if frame is not None:
-                    self.img_msg.header.frame_id = self._conf._name
-                    self.img_msg.header.stamp = self.node.get_clock().now().to_msg()
-                    self.img_pub.publish(self.img_msg)
+                self.img_msg.header.frame_id = self._conf._name
+                self.img_msg.header.stamp = self.node.get_clock().now().to_msg()
+                self.img_pub.publish(self.img_msg)
             except CvBridgeError as e:
                 logger.error(f"[Drone] [{self._conf._name}] img_publisher_callback, CvBridgeError: {e}")
 
@@ -638,7 +751,11 @@ class Drone():
 
     def close(self):
         """ Stop the drone object """
-        self._set_mled(cmd="EXT mled sc")
+        with self._motion_lock:
+            self.motion_safety.close()
+            self._safe_hover()
+        if self._safety_timer is not None:
+            self._safety_timer.cancel()
         self.dds.del_subject_info(self.status_sub)
         self.dds.stop()
         self.stop()
@@ -655,7 +772,10 @@ class Drone():
                 self.unsub_imu()
                 self.imu_timer.destroy()
             if self.img_pub:
-                self.img_timer.destroy()
+                self.camera.stop()
+                if self.img_timer is not None:
+                    self.node.destroy_timer(self.img_timer)
+                    self.img_timer = None
             # TODO
             #if self.pose_pub:
             #    self.ext_pose_sub.destroy()
@@ -720,7 +840,15 @@ class Drone():
         return response
     
     def _takeoff(self, async_flag=True, retry=4):
+        if not self.motion_safety.armed:
+            logger.warning(
+                f"[{self._conf._name}] Flight commands are disarmed. "
+                "Arm the drone before takeoff."
+            )
+            return False
         if self.state == State.Idle:
+            self.motion_safety.mark_safe('flight')
+            self.state = State.TakingOff
             self.init_baro = self.baro_data
             self.init_imu = self.imu_data
             self.init_attitude = self.attitude_data
@@ -746,13 +874,16 @@ class Drone():
                     time.sleep(0.5)
                     if resp_msg and (proto := resp_msg.get_proto()):
                         logger.info(f"[{self._conf._name}] takeoff, ret: {proto.resp}")
-                        if proto.resp == 'ok': return True 
+                        if proto.resp == 'ok':
+                            self.state = State.Hover
+                            return True
                     logger.warning(f"[{self._conf._name}] [takeoff] failed. retrying...")
                     retry -= 2
             if self.tof_data > 0.12:
                 self.stop(retry=1)
                 self._set_led(r=0,g=255,b=0, async_flag=True)
                 return True
+            self.state = State.Idle
             return False
         else:
             logger.warning(f"[{self._conf._name}] drone is not in idle state. Can not takeoff current state: {self.state}")
@@ -765,14 +896,18 @@ class Drone():
         if self.takeoff_h < 0.8 or self.takeoff_h > max_height:
             logger.warning(f"[{self._conf._name}] requested takeoff height is <=0.8m or >5m. doing takeoff at 0.8m")
         ret = self._takeoff(async_flag=request.sync)
-        if ret or self.tof_data > 0.5:
+        airborne = self.tof_data is not None and self.tof_data > 0.5
+        if ret or airborne:
             self.state = State.Automatic
+        else:
+            return response
         if self.takeoff_h<=0.8 or self.takeoff_h>max_height:
             response.success = True
             time.sleep(0.1)
             self._set_led(r=0,g=255,b=0, async_flag=True)
             return response
         elif self.takeoff_h<max_height:
+            self.state = State.TakingOff
             while True:
                 e = None
                 #logger.info(f"{self.tof_data=}")
@@ -794,13 +929,27 @@ class Drone():
                         self._set_led(r=0,g=255,b=0, async_flag=True)
                         break
                 if e:
-                    self.rc(z=e*75)
+                    if not self._send_supervised_rc(
+                        0.0,
+                        0.0,
+                        e * 75.0,
+                        0.0,
+                        source='takeoff_controller',
+                    ):
+                        self._safe_hover()
+                        return response
                 time.sleep(0.1)
             return response  
         response.success = ret
         return response
 
     def _land(self,async_flag=True, retry=10):
+        with self._motion_lock:
+            previous_state = self.state
+            self.motion_safety.mark_safe('flight')
+            self.state = State.Landing
+            if previous_state not in (State.Idle, State.Emergency):
+                self.rc(0, 0, 0, 0)
         cmd = "land"
         proto = protocol.TextProtoDrone()
         proto.text_cmd = cmd
@@ -823,12 +972,16 @@ class Drone():
                     logger.info(f"[{self._conf._name}] land, ret: {proto.resp}")
                     if proto.resp == 'ok': 
                         self.state = State.Idle
+                        if self._safety_require_arm:
+                            self.motion_safety.disarm()
                         return True
                 logger.warning(f"[{self._conf._name}] [land] failed. retrying...")
                 retry -= 2
                 time.sleep(0.1)
         if self.tof_data < 0.2:
             self.state = State.Idle
+            if self._safety_require_arm:
+                self.motion_safety.disarm()
             return True
         return False
     
@@ -860,34 +1013,72 @@ class Drone():
         except Exception as e:
             logger.warning(f"Drone: set rc, send_async_msg exception {e}")
 
+    def _send_supervised_rc(self, x, y, z, w, source):
+        with self._motion_lock:
+            decision = self.motion_safety.authorize(
+                'flight',
+                (x, y, z, w),
+                limits=((-100.0, 100.0),) * 4,
+                source=source,
+                motion_allowed=True,
+            )
+            if not decision.accepted:
+                logger.warning(
+                    f'[{self._conf._name}] Rejected internal flight '
+                    f'command: {decision.reason}',
+                    throttle_duration_sec=2,
+                )
+                return False
+            if decision.clamped:
+                logger.warning(
+                    f'[{self._conf._name}] Internal flight command exceeded '
+                    '[-100, 100] and was clamped.',
+                    throttle_duration_sec=2,
+                )
+            self.rc(*decision.values)
+            return True
+
     def cmd_vel(self, data:Twist|TwistStamped):
         data = data.twist if isinstance(data, TwistStamped) else data
-        if self.state == State.Idle:
-            logger.warning(f"[{self._conf._name}] cmd_vel, drone is in idle state. Takeoff first.", throttle_duration_sec=2)
-            return
-        self.state = State.Automatic
-        if abs(data.linear.x) > 1.0:
-            data.linear.x = data.linear.x/abs(data.linear.x)
-            logger.warning(f"[{self._conf._name}] cmd_vel, x velocity is out of range [-1,1] resetting.", throttle_duration_sec=2)
-        if abs(data.linear.y) > 1.0:
-            data.linear.y = data.linear.y/abs(data.linear.y)
-            logger.warning(f"[{self._conf._name}] cmd_vel, y velocity is out of range [-1,1] resetting.", throttle_duration_sec=2)
-        if abs(data.linear.z) > 1.0:
-            data.linear.z = data.linear.z/abs(data.linear.z)
-            logger.warning(f"[{self._conf._name}] cmd_vel, z velocity is out of range [-1,1] resetting.", throttle_duration_sec=2)
-        if abs(data.angular.z) > 1.0:
-            data.angular.z = data.angular.z/abs(data.angular.z)
-            logger.warning(f"[{self._conf._name}] cmd_vel, z angular velocity is out of range [-1,1] resetting.", throttle_duration_sec=2)
+        allowed_states = (State.Hover, State.Automatic, State.Custom)
+        with self._motion_lock:
+            decision = self.motion_safety.authorize(
+                'flight',
+                (
+                    data.linear.x,
+                    data.linear.y,
+                    data.linear.z,
+                    data.angular.z,
+                ),
+                limits=((-1.0, 1.0),) * 4,
+                source='cmd_vel',
+                motion_allowed=self.state in allowed_states,
+            )
+            if not decision.accepted:
+                logger.warning(
+                    f'[{self._conf._name}] Rejected flight command in '
+                    f'{self.state.name}: {decision.reason}',
+                    throttle_duration_sec=2,
+                )
+                return
+            if decision.clamped:
+                logger.warning(
+                    f'[{self._conf._name}] Flight command exceeded [-1, 1] '
+                    'and was clamped.',
+                    throttle_duration_sec=2,
+                )
+            self.state = State.Automatic
         # if self.yaw_hold:
         #     e = self.init_attitude[2] - self.attitude_data[2]
         #     data.angular.z = 0.02 * e
 
-        x = -1*int(data.linear.y*100)
-        y = int(data.linear.x*100)
-        z = int(data.linear.z*100)
-        w = int(data.angular.z*100)
+            linear_x, linear_y, linear_z, angular_z = decision.values
+            x = -1*int(linear_y*100)
+            y = int(linear_x*100)
+            z = int(linear_z*100)
+            w = int(angular_z*100)
 
-        self.rc(x, y, z, w)
+            self.rc(x, y, z, w)
     
     def stop(self, retry=5):
         cmd = "stop"
@@ -900,6 +1091,7 @@ class Drone():
                 if resp_msg and (proto := resp_msg.get_proto()):
                     logger.info(f"[{self._conf._name}] stop, ret: {proto.resp}")
                     if proto.resp == 'ok': 
+                        self.motion_safety.mark_safe('flight')
                         self.state = State.Hover 
                         logger.info(f"[{self._conf._name}] Hovering.")
                         return True
@@ -923,6 +1115,9 @@ class Drone():
         msg = protocol.TextMsg(proto)
 
     def _emergency(self, async_flag=True, retry=5):
+        with self._motion_lock:
+            self.motion_safety.emergency()
+            self.state = State.Emergency
         cmd = "emergency"
         proto = protocol.TextProtoDrone()
         proto.text_cmd = cmd
@@ -946,12 +1141,14 @@ class Drone():
         return False    
 
     def emergency(self, request, response:Empty.Response):
+        self.motion_safety.emergency()
         self._emergency(async_flag=True, retry=10)
         self.motor_off()
         self.state = State.Emergency
         return response
     
     def soft_emergency(self, request, response:Trigger.Response):
+        self.motion_safety.emergency()
         response.message = "Trying to land safely."
         response.success = False
         response.success = self._land(async_flag=False)
@@ -1444,9 +1641,15 @@ class TelloCamera(object):
         param display: bool (default False, use rviz to display video)
         return: bool
         """
-        self._video_stream(1)
+        if self._video_enable:
+            return True
+        if not self._video_stream(1):
+            return False
+        if not self._liveview.start_video_stream(display):
+            self._video_stream(0)
+            return False
         self._video_enable = True
-        return self._liveview.start_video_stream(display)
+        return True
 
     def stop_video_stream(self):
         flag = self._liveview.stop_video_stream()
@@ -1552,7 +1755,6 @@ class TelloCamera(object):
 
     def set_resolution(self, resolution='high', async_flag=False):
         """
-        TODO issue with low resolution, numpy running out of memory
         :param resolution [high, low]
         :return: bool: 
         """
@@ -1612,6 +1814,5 @@ class TelloCamera(object):
         frame = self._liveview.read_video_frame(timeout, strategy)
         if frame is None:
             return None
-        img = array(frame)
-        return img
+        return frame
  

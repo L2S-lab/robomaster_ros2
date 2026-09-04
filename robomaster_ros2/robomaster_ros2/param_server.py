@@ -29,6 +29,13 @@ class param_server(Node):
                 ('rmtt.pub_barometer', Parameter.Type.BOOL),
                 ('rmtt.pub_imu', Parameter.Type.BOOL),
                 ('rmtt.pub_mpad', Parameter.Type.BOOL),
+                ('rmtt.camera.fps', 'high'),
+                ('rmtt.camera.bitrate', 2),
+                ('rmtt.camera.resolution', 'low'),
+                ('rmtt.camera.publish_fps', 20.0),
+                ('rmtt.safety.command_timeout', Parameter.Type.DOUBLE),
+                ('rmtt.safety.require_arm', Parameter.Type.BOOL),
+                ('rmtt.safety.latch_deadman', Parameter.Type.BOOL),
             ])
         drone_name_list = self.get_parameter('rmtt.drone_name_list').value
         
@@ -54,6 +61,19 @@ class param_server(Node):
                 ('rmep.pub_cam', Parameter.Type.BOOL),
                 ('rmep.pub_marker', Parameter.Type.BOOL),
                 ('rmep.pub_armpose', Parameter.Type.BOOL),
+                ('rmep.pub_position', Parameter.Type.BOOL),
+                ('rmep.pub_gimbal_angle', Parameter.Type.BOOL),
+                ('rmep.camera.resolution', '540p'),
+                ('rmep.camera.publish_fps', 20.0),
+                ('rmep.armor.enabled', True),
+                ('rmep.gripper.control_mode', 'timed'),
+                ('rmep.gripper.power', 50),
+                ('rmep.gripper.full_travel_time', 1.25),
+                ('rmep.gripper.feedback_timeout', 3.0),
+                ('rmep.arm.completion_timeout', 10.0),
+                ('rmep.safety.command_timeout', Parameter.Type.DOUBLE),
+                ('rmep.safety.require_arm', Parameter.Type.BOOL),
+                ('rmep.safety.latch_deadman', Parameter.Type.BOOL),
             ])
         robot_name_list = self.get_parameter('rmep.robot_name_list').value
         for i in range(num_of_eps1):

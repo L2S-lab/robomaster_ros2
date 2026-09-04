@@ -60,15 +60,18 @@ class collission_check(Node):
         fig = plt.figure(figsize=(12, 10))
         ax = fig.add_subplot(111, projection='3d')
         
+        # Set axis limits with some padding
         ax.set_xlim(np.min(self.trajectories[:, :, 0]) - 1, np.max(self.trajectories[:, :, 0]) + 1)
         ax.set_ylim(np.min(self.trajectories[:, :, 1]) - 1, np.max(self.trajectories[:, :, 1]) + 1)
         ax.set_zlim(np.min(self.trajectories[:, :, 2]) - 1, np.max(self.trajectories[:, :, 2]) + 1)
         
+        # Add labels for clarity
         ax.set_xlabel('X (m)')
         ax.set_ylabel('Y (m)')
         ax.set_zlabel('Z (m)')
         ax.set_title('Multi-Drone Trajectory Visualization')
 
+        # Direction arrow size (adjust as needed)
         arrow_length = 0.15
 
         def update(frame):
@@ -83,10 +86,12 @@ class collission_check(Node):
             current_time = frame * self.duration / self.quality
             ax.set_title(f'Multi-Drone Trajectory Visualization - t={current_time:.2f}s')
             
+            # Use longer trail for more visual clarity
             trail_duration = 1.5  # seconds
             start_time = max(0, current_time - trail_duration)
 
             for i in range(self.nb_drones):
+                # Get trajectory points for the trail
                 trail_times = np.linspace(start_time, current_time, 50)
                 p = np.array([self.trajs[i].eval(t).pos for t in trail_times if self.trajs[i].eval(t) is not None])
                 
@@ -104,6 +109,7 @@ class collission_check(Node):
                         # Plot drone position
                         ax.scatter(pos[0], pos[1], pos[2], color=drone_color, marker='o', s=100, label=f"Drone {i+1}")
                         
+                        # Draw direction arrow based on yaw
                         dx = arrow_length * np.cos(yaw)
                         dy = arrow_length * np.sin(yaw)
                         
@@ -114,6 +120,7 @@ class collission_check(Node):
                                  arrow_length_ratio=0.3, 
                                  linewidth=2)
                         
+                        # Add text label for drone ID
                         ax.text(pos[0], pos[1], pos[2] + 0.2, f"{i+1}", color=drone_color, fontsize=12)
                 
             ax.legend(loc='upper right')

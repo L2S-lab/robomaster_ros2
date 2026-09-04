@@ -63,7 +63,7 @@ Drones
 
 .. code-block:: bash
 
-    ros2 service call /remove_drone robomaster_interface/srv/RemoveRobot "
+    ros2 service call /remove_robot robomaster_interface/srv/RemoveRobot "
     name: <drone_name_str>
     type: 'rmtt'
     "

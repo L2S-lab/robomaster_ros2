@@ -9,11 +9,38 @@ param_server:
         - rmep_3
         - rmep_4
 
-      # WIP (Work in Progress) not working now
       pub_imu: False                 # (WIP units issue)
-      pub_cam: False                 # (WIP units issue)
+      pub_cam: False                 # default camera setting; per-robot value can enable it
       pub_marker: False              # WIP
       pub_armpose: True              # Publish arm pose of the robot
+      pub_position: True            # Publish chassis x/y position and yaw at 10 Hz
+      pub_gimbal_angle: True        # Publish gimbal angles at 10 Hz (EP/S1 only)
+
+      camera:
+        resolution: 540p             # 360p, 540p, or 720p
+        publish_fps: 20.0            # maximum ROS image publication rate
+
+      armor:
+        enabled: True                # Publish water/IR hit events and sensitivity service
+
+      gripper:
+        control_mode: timed          # timed or feedback (endpoint feedback only)
+        power: 50                    # default open/close power, 1-100
+        full_travel_time: 1.25       # calibrated seconds for 0-100% timed motion
+        feedback_timeout: 3.0        # endpoint wait timeout in feedback mode
+
+      arm:
+        completion_timeout: 10.0     # default wait; clamped to 0.1-60 seconds
+
+      safety:
+        # Non-zero chassis/gimbal commands expire after this many seconds.
+        # Set to 0.0 only when legacy non-expiring behavior is required.
+        command_timeout: 0.5
+        # False preserves current cmd_vel behavior. When true, call
+        # /<robot>/set_armed before motion.
+        require_arm: False
+        # When true, a deadman trip rejects new motion until re-armed.
+        latch_deadman: False
 
   # Individual robot configurations and parameter control
   # name in the list should be the same as the name in the robot_name_list
@@ -21,12 +48,12 @@ param_server:
   # topic_type: Pose/ PoseStamped/ Point/ PointStamped
       rmep_1:
         ip: "192.168.0.161"
-        pub_cam: False # WIP
+        pub_cam: False
         ext_pose_topic_type: PoseStamped
         ext_pose_topic_name: /rmep_1/pose
 
       rmep_2:
         ip: "192.168.0.162"
-        pub_cam: False # WIP
+        pub_cam: True
         ext_pose_topic_type: PoseStamped
         ext_pose_topic_name: /rmep_2/pose

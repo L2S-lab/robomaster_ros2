@@ -1,5 +1,4 @@
 import threading
-import time
 
 from rclpy.logging import get_logger
 logger = get_logger('action')
@@ -97,8 +96,16 @@ class Action(metaclass=_AutoRegisterAction):
 
     @property
     def is_completed(self):
-        return (self._percent == 100 or self._state is ACTION_SUCCEEDED) or (self._state is ACTION_FAILED) or \
-               (self.state is ACTION_EXCEPTION) or (self.state is ACTION_REJECTED)
+        return (
+            self._percent == 100
+            or self._state in (
+                ACTION_SUCCEEDED,
+                ACTION_FAILED,
+                ACTION_ABORTED,
+                ACTION_EXCEPTION,
+                ACTION_REJECTED,
+            )
+        )
 
     @property
     def _is_aborting(self):
@@ -160,18 +167,18 @@ class Action(metaclass=_AutoRegisterAction):
         :param timeout: Timeout, if the task action is not completed before the timeout, it will be returned directly
         :return: bool: If the action completes within the specified time, return True; if the action times out, return False.
         """
-        if self._event.isSet() and self.is_completed:
+        if self._event.is_set() and self.is_completed:
             return True
 
         if timeout:
             self._event.wait(timeout)
-            if not self._event.isSet():
+            if not self._event.is_set():
                 logger.debug("Action: wait_for_completed timeout.")
                 self._changeto_state(ACTION_EXCEPTION)
                 return False
         else:
             self._event.wait()
-            if not self._event.isSet():
+            if not self._event.is_set():
                 logger.debug("Action: wait_for_completed timeout.")
                 self._changeto_state(ACTION_EXCEPTION)
                 return False
@@ -200,7 +207,6 @@ class ActionDispatcher(object):
         self._client = client
         self._in_progress_mutex = threading.Lock()
         self._in_progress = {}
-        self.start_time = time.time()
 
     def initialize(self):
         self._client.add_handler(self, "ActionDispatcher", self._on_recv) 
@@ -235,7 +241,7 @@ class ActionDispatcher(object):
                 logger.warning("[ActionDispatcher] in_progress action is None")
         self._in_progress_mutex.release()
 
-        if found_proto:
+        if found_proto and not action.is_completed:
             if proto._retcode == 0:
                 if proto._accept == 0:
                     action._changeto_state(ACTION_STARTED) 
@@ -272,42 +278,72 @@ class ActionDispatcher(object):
         """ Send task action commands """
         action._action_id = action._get_next_action_id()
         action_msg = self.get_msg_by_action(action)
-        self._client.send_msg(action_msg) 
+        self._client.send_msg(action_msg)
         logger.debug("ActionDispatcher: send_action, action:{0}".format(action))
+        return action
 
     def send_action(self, action, action_type=ACTION_NOW):
-        self.start_time = time.time()
         """ Send task action commands """
         action._action_id = action._get_next_action_id()
-        
-        if self.has_in_progress_actions:
-            self._in_progress_mutex.acquire()
-            for k in self._in_progress:
-                act = self._in_progress[k]
-                if action.target == act.target:
-                    if time.time() - self.start_time < 3:                        
-                        action = list(self._in_progress.values())[0]
-                        logger.warn("[ActionDispatcher] Robot is already performing {0} action(s) {1}".format(len(self._in_progress), action))
-                        # raise Exception("Robot is already performing {0} action(s) {1}".format(
-                        #     len(self._in_progress), action))
-                    else:
-                        logger.warn("ActionDispatcher, del action:{0}. reason: timeout".format(action))
-                        del self._in_progress[k]
-            self._in_progress_mutex.release()
-        if action.is_running:
-            raise Exception("Action is already running")
-
         action_msg = self.get_msg_by_action(action)
         action_key = action.make_action_key()
-        self._in_progress[action_key] = action
-        self._client.add_handler(self, "ActionDispatcher", self._on_recv) 
         action._obj = self
         action._on_state_changed = self._on_action_state_changed
 
-        self._client.send_msg(action_msg) 
+        with self._in_progress_mutex:
+            active = [
+                tracked for tracked in self._in_progress.values()
+                if tracked.target == action.target
+                and not tracked.is_completed
+            ]
+            if active:
+                raise RuntimeError(
+                    "Robot is already performing an action for target "
+                    "0x{0:02x}: {1}".format(action.target, active[0])
+                )
+            self._in_progress[action_key] = action
+
+        self._client.add_handler(self, "ActionDispatcher", self._on_recv)
+
+        self._client.send_msg(action_msg)
         # if isinstance(action, TextAction):
         #     action._changeto_state(ACTION_STARTED)
         logger.debug("ActionDispatcher: send_action, action:{0}".format(action))
+        return action
+
+    def cancel_action(self, action, timeout=1.0):
+        """Cancel a tracked DJI action and mark it aborted on acknowledgement."""
+        if action is None or action.is_completed:
+            return False
+
+        action_key = action.make_action_key()
+        with self._in_progress_mutex:
+            if self._in_progress.get(action_key) is not action:
+                logger.warning(
+                    "ActionDispatcher: cannot cancel an untracked action: "
+                    "{0}".format(action)
+                )
+                return False
+
+        proto = action.encode()
+        if not hasattr(proto, '_action_ctrl'):
+            logger.warning(
+                "ActionDispatcher: action protocol does not support cancel: "
+                "{0}".format(action)
+            )
+            return False
+        proto._action_id = action._action_id
+        proto._action_ctrl = 1
+        msg = protocol.Msg(self._client.hostbyte, action.target, proto)
+        resp_msg = self._client.send_sync_msg(msg, timeout=timeout)
+        if resp_msg is None:
+            return False
+        resp_proto = resp_msg.get_proto()
+        if resp_proto is None or resp_proto._retcode != 0:
+            return False
+
+        action._abort()
+        return True
 
     @classmethod
     def _on_action_state_changed(cls, self, action, orgin, target):

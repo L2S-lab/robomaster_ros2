@@ -26,13 +26,14 @@ First Installation
    .. code-block:: bash
 
       pip install pillow myqr pynput
-      sudo apt-get install network-manager libopus-dev
-      sudo apt install ros-$ROS_DISTRO-tf-transformations ros-$ROS_DISTRO-nav-msgs
+      sudo apt-get install network-manager python3-av
+      sudo apt install ros-$ROS_DISTRO-tf-transformations ros-$ROS_DISTRO-cv-bridge ros-$ROS_DISTRO-nav-msgs
 
-   Optional Installation for video streaming
+   Optional installation for EP audio streaming
 
    .. code-block:: bash
 
+      sudo apt-get install libopus-dev
       pip install git+https://github.com/aarsht7/RoboMaster-SDK.git@libmedia_codec
 
 4. Set up ROS 2 workspace
@@ -49,7 +50,7 @@ First Installation
 
         cd ../
         source /opt/ros/$ROS_DISTRO/setup.bash
-        colcon build --symlink-install robomaster_interface robomaster_ros2 robomaster_examples robomaster_gz
+            colcon build --symlink-install --packages-select robomaster_interface robomaster_ros2 robomaster_examples 
 
     .. note::
        symlink-install allows you to edit Python and config files without running `colcon build` every time.

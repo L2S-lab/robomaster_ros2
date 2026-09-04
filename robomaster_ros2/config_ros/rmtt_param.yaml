@@ -7,6 +7,8 @@ param_server:
         - rmtt_1   
         - rmtt_2  
         - rmtt_3
+        - rmtt_4
+        - rmtt_5
 
       pub_front_tof: False           # (Too heavy on process, avoid using with multi drones) whether to publish front tof sensor data
       pub_bottom_tof: True          # whether to publish bottom tof sensor data
@@ -15,13 +17,31 @@ param_server:
       pub_imu: False                 # (WIP units issue) 
       pub_mpad: False                # Publish info of mission pad below the drone
 
+      camera:
+        # Multi-drone defaults: keep frame rate high while reducing airtime and
+        # ROS serialization cost. Use high/5/high for maximum single-drone quality.
+        fps: high                    # high, middle, low
+        bitrate: 2                   # 0 (auto) or 1.5 Mbit/s
+        resolution: low              # low (480p) or high (720p)
+        publish_fps: 20.0            # maximum ROS image publication rate
+
+      safety:
+        # Non-zero flight commands expire after this many seconds.
+        # Set to 0.0 only when legacy non-expiring behavior is required.
+        command_timeout: 0.5
+        # False preserves existing takeoff/cmd_vel workflows. When true,
+        # call /<drone>/set_armed before takeoff or motion.
+        require_arm: False
+        # When true, a deadman trip rejects new motion until re-armed.
+        latch_deadman: False
+
   #####MANDATORY#####
   # Individual drone configurations and parameter control for all the drones
   # name in the list should be the same as the name in the drone_name_list
   # topic_type: Pose/ PoseStamped/ Point/ PointStamped
       rmtt_1:
         ip: "192.168.0.151"
-        pub_cam: False
+        pub_cam: True
         cam_direction: 0             # 0: forward, 1: down
         yaw_hold: False              # WIP
         ext_pose_topic_type: PoseStamped
@@ -29,8 +49,8 @@ param_server:
 
       rmtt_2:
         ip: "192.168.0.152"
-        pub_cam: False
-        cam_direction: 0             # 0: forward, 1: down
+        pub_cam: True
+        cam_direction: 1             # 0: forward, 1: down
         yaw_hold: False              # WIP
         ext_pose_topic_type: PoseStamped
         ext_pose_topic_name: /rmtt_2/pose
@@ -42,3 +62,19 @@ param_server:
         yaw_hold: False              # WIP
         ext_pose_topic_type: PoseStamped
         ext_pose_topic_name: /rmtt_3/pose
+
+      rmtt_4:
+        ip: "192.168.0.154"
+        pub_cam: False
+        cam_direction: 0             # 0: forward, 1: down
+        yaw_hold: False              # WIP
+        ext_pose_topic_type: PoseStamped
+        ext_pose_topic_name: /rmtt_4/pose
+
+      rmtt_5:
+        ip: "192.168.0.155"
+        pub_cam: False
+        cam_direction: 0             # 0: forward, 1: down
+        yaw_hold: False              # WIP
+        ext_pose_topic_type: PoseStamped
+        ext_pose_topic_name: /rmtt_5/pose

@@ -14,6 +14,7 @@ setup(
         ('share/' + package_name + '/launch', glob.glob('launch/*.launch')),
         ('share/' + package_name + '/launch', glob.glob('launch/*.launch.py')),
         ('share/' + package_name + '/waypoints', glob.glob('waypoints/*.csv')),
+        ('share/' + package_name + '/waypoints', glob.glob('waypoints/trajectories/*.wps')),
         ('share/' + package_name + '/waypoints', glob.glob('waypoints/*.wps')),
         ('share/' + package_name + '/waypoints', glob.glob('waypoints/*.yml')),
         ('share/' + package_name + '/waypoints', glob.glob('waypoints/*.yaml')),
@@ -30,6 +31,7 @@ setup(
             "waypoints = robomaster_examples.waypoints:main",  
             "execute_trajectory = robomaster_examples.execute_trajectory:main",
             "collission_check = robomaster_examples.collission_check:main",
+            "fleet_stress_test = robomaster_examples.fleet_stress_test:main",
         ],
     },
 )

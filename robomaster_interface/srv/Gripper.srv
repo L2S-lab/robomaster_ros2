@@ -1,3 +1,4 @@
-int32 distance # close at 0%, 25%, 50%, 75%, 100%
+int32 distance # 0% closed; 25%, 50%, 75%; 100% opened
 ---
 bool success
+string message

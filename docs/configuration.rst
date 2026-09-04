@@ -13,7 +13,7 @@ All configuration files are located in the `robomaster_ros2/config_ros` director
 * `rmep_param.yaml`: Configuration for the RoboMaster EP Core (RMEP) robots.
 * `setup_wifi.yaml`: Configuration for the Wi-Fi connection of the RMTT drones and RMEP robots.
 * `custom_char.yaml`: Custom characters for the RMTT drones external module LED matrix.
-* `retrieve_robot_info.yaml`: Configuration for the retrieval of information of connected robots and drones.
+* `retrive_robot_info.yaml`: Configuration for the retrieval of information of connected robots and drones.
 
 robomaster_server.yaml
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -45,6 +45,12 @@ rmtt_param.yaml
         pub_barometer: False           # (WIP units issue) 
         pub_imu: False                 # (WIP units issue) 
         pub_mpad: False                # Publish info of mission pad below the drone
+
+        camera:
+            fps: high                  # high, middle, low
+            bitrate: 2                 # 0 (auto) or 1..5 Mbit/s
+            resolution: low            # low (480p) or high (720p)
+            publish_fps: 20.0          # maximum ROS image publication rate
 
         # It is advisible to use the random_assign option in robomaster_server.yaml
         
@@ -88,11 +94,28 @@ rmep_param.yaml
             - rmep_1   
             - rmep_2  
 
-        # WIP (Work in Progress) not working now
         pub_imu: False                 # (WIP units issue)
-        pub_cam: False                 # (WIP units issue)
+        pub_cam: False                 # default for all EP/Core robots
         pub_marker: False              # WIP
         pub_armpose: True              # Publish arm pose of the robot
+        pub_position: False            # Publish chassis x/y and yaw at 10 Hz
+        pub_gimbal_angle: False        # Publish gimbal angles at 10 Hz (EP/S1 only)
+
+        camera:
+            resolution: 540p           # 360p, 540p, or 720p
+            publish_fps: 20.0          # maximum ROS image publication rate
+
+        armor:
+            enabled: True              # publish water/IR hits and sensitivity service
+
+        gripper:
+            control_mode: timed        # timed or feedback (endpoints only)
+            power: 50                  # default open/close power, 1--100
+            full_travel_time: 1.25     # calibrated 0--100% travel time in seconds
+            feedback_timeout: 3.0      # endpoint wait timeout in seconds
+
+        arm:
+            completion_timeout: 10.0   # default completion wait; 0.1--60 seconds
 
     # Individual robot configurations and parameter control
     # name in the list should be the same as the name in the robot_name_list
@@ -100,13 +123,13 @@ rmep_param.yaml
     # topic_type: Pose/ PoseStamped/ Point/ PointStamped
         rmep_1:
             ip: "192.168.0.161"
-            pub_cam: False # WIP
+            pub_cam: False
             ext_pose_topic_type: PoseStamped
             ext_pose_topic_name: /rmep_1/pose
 
         rmep_2:
             ip: "192.168.0.162"
-            pub_cam: False # WIP
+            pub_cam: False
             ext_pose_topic_type: PoseStamped
             ext_pose_topic_name: /rmep_2/pose
 
@@ -180,7 +203,7 @@ custom_char.yaml
     heart: '0000000000r00r000rrrrrr00rrrrrr00rrrrrr000rrrr00000rr00000000000'
 
 
-retrieve_robot_info.yaml
+retrive_robot_info.yaml
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is not used in the latest version but can be handy, hence it is included here.

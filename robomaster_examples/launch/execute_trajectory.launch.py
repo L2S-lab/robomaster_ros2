@@ -13,15 +13,13 @@ def node_fn(context, *args, **kwargs):
     world_frame = LaunchConfiguration('world_frame')
     trajectory = get_package_share_directory('robomaster_examples')+'/waypoints/'+LaunchConfiguration('trajectory').perform(context)
     frequency = 20    
-    # Takeoff all the drones before executing the trajectory
     # idx is used to identify the robot in the trajectory file
     # takeoff_height is WIP, used to set the height of the robot at takeoff
     # takeoff_time is WIP, used to delay the takeoff of the robot
     robots = {
-        # <name>: {'idx': <idx in yml>, 'tf_frame': <tf_frame>, 'takeoff_height': 0.0, 'takeoff_time': 0.0}
-        "rmtt_1": {'idx': 1,'tf_frame': 'rmtt_1','takeoff_height': 0.0,'takeoff_time': 0.0},
-        "rmtt_2": {'idx': 2, 'tf_frame': 'rmtt_2','takeoff_height': 0.0,'takeoff_time': 0.0},
-        "rmtt_3": {'idx': 3, 'tf_frame': 'rmtt_3','takeoff_height': 0.0,'takeoff_time': 0.0},
+        "rmtt_1": {'idx': 1,'tf_frame': 'rmtt_1','takeoff_height': 1.2,'takeoff_time': 0.0},
+        "rmtt_2": {'idx': 2, 'tf_frame': 'rmtt_2','takeoff_height': 1.2,'takeoff_time': 0.0},
+        "rmtt_3": {'idx': 3, 'tf_frame': 'rmtt_3','takeoff_height': 1.2,'takeoff_time': 0.0},
         }
     
     for robot,val in robots.items():

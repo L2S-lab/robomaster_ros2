@@ -12,6 +12,8 @@
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+  <exec_depend>python3-av</exec_depend>
   <depend>tf_transformations</depend>
   <!--sudo pip3 install transforms3d-->
   <depend>std_srvs</depend>

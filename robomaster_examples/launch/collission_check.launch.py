@@ -1,3 +1,4 @@
+import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -31,6 +32,6 @@ def generate_launch_description():
         DeclareLaunchArgument('trajectory', default_value='multi_drone_spiral.yml', description='Trajectory file YAML or CSV'),
         DeclareLaunchArgument('nb_drones', default_value='2', description='Number of drones'),
         DeclareLaunchArgument('safe_distance', default_value='0.2', description='Safe distance between drones'),
-        DeclareLaunchArgument('quality', default_value='50', description='Quality of trajectory for collision checking'),
+        DeclareLaunchArgument('quality', default_value='50', description='Quality of trajectory'),
         OpaqueFunction(function=node_fn)
     ])
