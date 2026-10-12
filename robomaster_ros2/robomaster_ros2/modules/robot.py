@@ -11,7 +11,6 @@ from std_srvs.srv import SetBool
 from std_srvs.srv import Trigger
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PointStamped, PoseStamped
-from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from tf_transformations import quaternion_from_euler
 from rclpy.callback_groups import (
@@ -97,6 +96,7 @@ try:
     from .common import *
     from .globals import *
     from .motion_safety import MotionSafety
+    from .image_transport_publisher import CompressedImagePublisher
 except ImportError as e:
     import protocol, config, dds, camera
     from action import ActionDispatcher, Action
@@ -105,6 +105,7 @@ except ImportError as e:
     from common import *
     from globals import *
     from motion_safety import MotionSafety
+    from image_transport_publisher import CompressedImagePublisher
 except Exception as e:
     logger.error(f"Import Error pass two: {e}")
 
@@ -478,7 +479,7 @@ def scan_robot_ip_list(nb_robots:int,timeout=None):
             break
         if len(ip_list) >= nb_robots:
             break
-        s.settimeout(0.5)
+        s.settimeout(1.0)
         try:
             data, ip = s.recvfrom(1024)
         except Exception as e:
@@ -799,6 +800,32 @@ class Robot():
         self.current_arm_action = None
         self.current_arm_command = 'idle'
         self._arm_lock = threading.RLock()
+        self._arm_cmd_lock = threading.RLock()
+        self.arm_cmd_vel_sub = None
+        self.arm_cmd_vel_timer = None
+        self.arm_cmd_vel_rate = max(
+            float(params.get('arm_cmd_vel_rate', 20.0)), 5.0
+        )
+        self.arm_cmd_vel_timeout = max(
+            float(params.get('arm_cmd_vel_timeout', 0.25)), 0.05
+        )
+        self.arm_cmd_vel_max_x = max(
+            float(params.get('arm_cmd_vel_max_x', 0.20)), 0.01
+        )
+        self.arm_cmd_vel_max_z = max(
+            float(params.get('arm_cmd_vel_max_z', 0.20)), 0.01
+        )
+        self.arm_cmd_step_limit_x = max(
+            float(params.get('arm_cmd_step_limit_x', 0.03)), 0.005
+        )
+        self.arm_cmd_step_limit_z = max(
+            float(params.get('arm_cmd_step_limit_z', 0.03)), 0.005
+        )
+        self._arm_cmd_vx = 0.0
+        self._arm_cmd_vz = 0.0
+        self._arm_cmd_last_update_ns = 0
+        self._arm_cmd_last_tick_ns = 0
+        self._arm_stream_warn_ns = 0
         requested_arm_timeout = float(
             params.get('arm_completion_timeout', 10.0)
         )
@@ -890,8 +917,8 @@ class Robot():
                 self.arm_position_msg.header.frame_id = self._conf._name
             if params.get("cam", False):
                 self.camera = camera.EPCamera(self)
-                self.img_pub = self.node.create_publisher(
-                    Image, 'image', CAMERA_QOS
+                self.img_pub = CompressedImagePublisher(
+                    self.node, 'image', CAMERA_QOS
                 )
                 self.bridge = CvBridge()
             if self.motion_safety.default_timeout > 0.0:
@@ -954,10 +981,11 @@ class Robot():
     def set_motion_armed(self, armed):
         """Set the motion gate arm state without changing existing APIs."""
         with self._motion_lock:
+            self._clear_arm_cmd_vel()
             if armed:
                 return self.motion_safety.arm()
             self.motion_safety.disarm()
-            self._safe_stop_channels(('chassis', 'gimbal'))
+            self._safe_stop_channels(('chassis', 'gimbal', 'arm'))
             return True
 
     def set_armed(self, request, response:SetBool.Response):
@@ -983,6 +1011,8 @@ class Robot():
         )
 
     def _safe_stop_channels(self, channels):
+        if 'arm' in channels:
+            self._clear_arm_cmd_vel()
         if not self._initialized:
             return
         if 'chassis' in channels:
@@ -1070,6 +1100,15 @@ class Robot():
                     self.publish_arm_action_status,
                     callback_group=self.manipulator_cbg,
                 )
+                self.arm_cmd_vel_sub = self.node.create_subscription(
+                    Twist, 'arm_cmd_vel', self.arm_cmd_vel, 20,
+                    callback_group=self.manipulator_cbg,
+                )
+                self.arm_cmd_vel_timer = self.node.create_timer(
+                    1.0 / self.arm_cmd_vel_rate,
+                    self._publish_arm_cmd_vel,
+                    callback_group=self.manipulator_cbg,
+                )
                 self.gripper_srv = self.node.create_service(
                     Gripper, 'gripper', self.gripper,
                     callback_group=self.manipulator_cbg,
@@ -1139,7 +1178,7 @@ class Robot():
                 self._cancel_arm_action(action)
         with self._motion_lock:
             self.motion_safety.close()
-            self._safe_stop_channels(('chassis', 'gimbal'))
+            self._safe_stop_channels(('chassis', 'gimbal', 'arm'))
         if self._safety_timer is not None:
             self._safety_timer.cancel()
         if self.img_timer is not None and self.node is not None:
@@ -1148,11 +1187,16 @@ class Robot():
         if self.arm_action_timer is not None and self.node is not None:
             self.node.destroy_timer(self.arm_action_timer)
             self.arm_action_timer = None
+        if self.arm_cmd_vel_timer is not None and self.node is not None:
+            self.node.destroy_timer(self.arm_cmd_vel_timer)
+            self.arm_cmd_vel_timer = None
         if self.gripper_state_timer is not None and self.node is not None:
             self.node.destroy_timer(self.gripper_state_timer)
             self.gripper_state_timer = None
         if self.camera is not None:
             self.camera.stop()
+        if self.img_pub is not None:
+            self.img_pub.close()
         if self._initialized:
             time.sleep(0.1)
             self._enable_sdk(0)
@@ -1615,6 +1659,114 @@ class Robot():
         self._action_dispatcher.send_action(arm_action)
         return arm_action
 
+    def _move_arm_async(self, x=0.0, z=0.0, absolute=False):
+        """Send an untracked arm action for a velocity command stream."""
+        arm_action = RoboticArmMoveAction(
+            x=x * 1000.0,
+            y=0,
+            z=z * 1000.0,
+            mode=1 if absolute else 0,
+        )
+        self._action_dispatcher.send_async_action(arm_action)
+        return arm_action
+
+    def _clear_arm_cmd_vel(self):
+        with self._arm_cmd_lock:
+            self._arm_cmd_vx = 0.0
+            self._arm_cmd_vz = 0.0
+            self._arm_cmd_last_update_ns = 0
+            self._arm_cmd_last_tick_ns = 0
+
+    def arm_cmd_vel(self, data: Twist):
+        """Cache authorized X/Z arm velocities in metres per second."""
+        with self._motion_lock:
+            self._safety_watchdog()
+            decision = self.motion_safety.authorize(
+                'arm', (data.linear.x, data.linear.z),
+                limits=(
+                    (-self.arm_cmd_vel_max_x, self.arm_cmd_vel_max_x),
+                    (-self.arm_cmd_vel_max_z, self.arm_cmd_vel_max_z),
+                ),
+                source='arm_cmd_vel',
+                motion_allowed=self._initialized,
+                timeout=self.arm_cmd_vel_timeout,
+            )
+            if not decision.accepted:
+                self._clear_arm_cmd_vel()
+                self.motion_safety.mark_safe('arm')
+                logger.warning(
+                    f'[{self._conf._name}] Rejected arm command: {decision.reason}',
+                    throttle_duration_sec=2,
+                )
+                return
+            now_ns = time.monotonic_ns()
+            with self._arm_cmd_lock:
+                self._arm_cmd_vx, self._arm_cmd_vz = decision.values
+                self._arm_cmd_last_update_ns = now_ns
+                if self._arm_cmd_last_tick_ns == 0:
+                    self._arm_cmd_last_tick_ns = now_ns
+
+    def _publish_arm_cmd_vel(self):
+        with self._motion_lock:
+            self._safety_watchdog()
+            if (
+                not self._initialized
+                or self._action_dispatcher is None
+                or not self.motion_safety.armed
+            ):
+                self._clear_arm_cmd_vel()
+                return
+
+            now_ns = time.monotonic_ns()
+            with self._arm_cmd_lock:
+                stale = (
+                    self._arm_cmd_last_update_ns == 0
+                    or now_ns - self._arm_cmd_last_update_ns
+                    >= int(self.arm_cmd_vel_timeout * 1e9)
+                )
+                dt = (now_ns - self._arm_cmd_last_tick_ns) / 1e9
+                self._arm_cmd_last_tick_ns = now_ns
+                vx, vz = self._arm_cmd_vx, self._arm_cmd_vz
+            if stale:
+                self._clear_arm_cmd_vel()
+                self.motion_safety.mark_safe('arm')
+                return
+            if dt <= 0.0:
+                return
+            dt = min(dt, 0.2)
+            dx = float(np.clip(
+                vx * dt, -self.arm_cmd_step_limit_x, self.arm_cmd_step_limit_x
+            ))
+            dz = float(np.clip(
+                vz * dt, -self.arm_cmd_step_limit_z, self.arm_cmd_step_limit_z
+            ))
+            if abs(dx) < 1e-6 and abs(dz) < 1e-6:
+                return
+
+            with self._arm_lock:
+                with self._arm_cmd_lock:
+                    if self._arm_cmd_last_update_ns == 0:
+                        return
+                active = self.current_arm_action
+                if active is not None and not active.is_completed:
+                    self._clear_arm_cmd_vel()
+                    self.motion_safety.mark_safe('arm')
+                    if now_ns - self._arm_stream_warn_ns > int(1e9):
+                        self._arm_stream_warn_ns = now_ns
+                        logger.warning(
+                            f'[{self._conf._name}] arm_cmd_vel skipped while a '
+                            'tracked arm action is running.'
+                        )
+                    return
+                try:
+                    self._move_arm_async(x=dx, z=dz, absolute=False)
+                except Exception as exc:
+                    self._clear_arm_cmd_vel()
+                    self.motion_safety.mark_safe('arm')
+                    logger.warning(
+                        f'[{self._conf._name}] Failed to stream arm_cmd_vel: {exc}'
+                    )
+
     def _start_arm_action(self, x, z, absolute, command):
         with self._arm_lock:
             if (
@@ -1622,6 +1774,8 @@ class Robot():
                 and not self.current_arm_action.is_completed
             ):
                 return None, 'The robotic arm is already executing an action.'
+            self._clear_arm_cmd_vel()
+            self.motion_safety.mark_safe('arm')
             try:
                 action = self._move_arm(x=x, z=z, absolute=absolute)
             except Exception as exc:

@@ -32,6 +32,7 @@ setup(
             "execute_trajectory = robomaster_examples.execute_trajectory:main",
             "collission_check = robomaster_examples.collission_check:main",
             "fleet_stress_test = robomaster_examples.fleet_stress_test:main",
+            "joy_fleet_teleop = robomaster_examples.joy_fleet_teleop:main",
         ],
     },
 )
