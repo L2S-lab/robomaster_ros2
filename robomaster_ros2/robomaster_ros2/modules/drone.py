@@ -52,6 +52,7 @@ try:
     from .common import *
     from .globals import *
     from .motion_safety import MotionSafety
+    from .image_transport_publisher import CompressedImagePublisher
 except ImportError as e:
     import protocol, config, dds
     import media
@@ -59,6 +60,7 @@ except ImportError as e:
     from common import *
     from globals import *
     from motion_safety import MotionSafety
+    from image_transport_publisher import CompressedImagePublisher
 except Exception as e:
     logger.error(f"Import Error pass two: {e}")
 
@@ -548,8 +550,8 @@ class Drone():
                 self._sock_vdo.bind(self._conf._video_stream_addr)
                 self._video_conn = media.StreamConnection(sock=self._sock_vdo, robot_ip = self._conf.default_robot_addr[0])
                 self.camera = TelloCamera(self)
-                self.img_pub = self.node.create_publisher(
-                    Image, 'image', CAMERA_QOS
+                self.img_pub = CompressedImagePublisher(
+                    self.node, 'image', CAMERA_QOS
                 )
                 self.img_msg = Image()
                 self.img_timer = None
@@ -776,6 +778,7 @@ class Drone():
                 if self.img_timer is not None:
                     self.node.destroy_timer(self.img_timer)
                     self.img_timer = None
+                self.img_pub.close()
             # TODO
             #if self.pose_pub:
             #    self.ext_pose_sub.destroy()
