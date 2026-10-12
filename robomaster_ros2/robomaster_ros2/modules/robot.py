@@ -11,7 +11,6 @@ from std_srvs.srv import SetBool
 from std_srvs.srv import Trigger
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PointStamped, PoseStamped
-from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from tf_transformations import quaternion_from_euler
 from rclpy.callback_groups import (
@@ -97,6 +96,7 @@ try:
     from .common import *
     from .globals import *
     from .motion_safety import MotionSafety
+    from .image_transport_publisher import CompressedImagePublisher
 except ImportError as e:
     import protocol, config, dds, camera
     from action import ActionDispatcher, Action
@@ -105,6 +105,7 @@ except ImportError as e:
     from common import *
     from globals import *
     from motion_safety import MotionSafety
+    from image_transport_publisher import CompressedImagePublisher
 except Exception as e:
     logger.error(f"Import Error pass two: {e}")
 
@@ -916,8 +917,8 @@ class Robot():
                 self.arm_position_msg.header.frame_id = self._conf._name
             if params.get("cam", False):
                 self.camera = camera.EPCamera(self)
-                self.img_pub = self.node.create_publisher(
-                    Image, 'image', CAMERA_QOS
+                self.img_pub = CompressedImagePublisher(
+                    self.node, 'image', CAMERA_QOS
                 )
                 self.bridge = CvBridge()
             if self.motion_safety.default_timeout > 0.0:
@@ -1194,6 +1195,8 @@ class Robot():
             self.gripper_state_timer = None
         if self.camera is not None:
             self.camera.stop()
+        if self.img_pub is not None:
+            self.img_pub.close()
         if self._initialized:
             time.sleep(0.1)
             self._enable_sdk(0)
