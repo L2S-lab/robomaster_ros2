@@ -478,7 +478,7 @@ def scan_robot_ip_list(nb_robots:int,timeout=None):
             break
         if len(ip_list) >= nb_robots:
             break
-        s.settimeout(0.5)
+        s.settimeout(1.0)
         try:
             data, ip = s.recvfrom(1024)
         except Exception as e:
