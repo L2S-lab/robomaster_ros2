@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
+  <title>Packages and ROS API &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=036e6a88"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -44,20 +44,20 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#explanation-of-packages">Explanation of packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#interfaces">Interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#robomaster-ros-2">RoboMaster ROS 2</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#robomaster-server">robomaster server</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Packages and ROS API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#namespaces-and-availability">Namespaces and availability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#server-services">Server services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drone-services">Drone services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ground-robot-services">Ground robot services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#topics-and-units">Topics and units</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">Using the hardware driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fleet_tools.html">Fleet diagnostics and joystick control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Command-line and trajectory examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting and current limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 
         </div>
@@ -74,7 +74,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Overview</li>
+      <li class="breadcrumb-item active">Packages and ROS API</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/overview.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -84,234 +84,240 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="overview">
-<span id="id1"></span><h1>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h1>
-<p>This page explain the overview of the RoboMaster ROS 2 packages:</p>
-<section id="explanation-of-packages">
-<h2>Explanation of packages<a class="headerlink" href="#explanation-of-packages" title="Link to this heading"></a></h2>
-<p>Source code is divided into several packages, each with its own purpose:</p>
-<ul class="simple">
-<li><p><strong>robomaster_interface</strong>: This package provides the interface for controlling the RoboMaster robots and drones.</p></li>
-<li><p><strong>robomaster_ros2</strong>: This package contains the main implementation of the RoboMaster ROS 2 node.</p></li>
-<li><p><strong>robomaster_examples</strong>: This package includes example scripts using the RoboMaster ROS 2 node.</p></li>
-<li><p><strong>robomaster_gz</strong>: This package provides integration with Gazebo for simulating the RoboMaster drones.</p></li>
-</ul>
+  <section id="packages-and-ros-api">
+<span id="overview"></span><h1>Packages and ROS API<a class="headerlink" href="#packages-and-ros-api" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">robomaster_ros2</span></code> contains the hardware server, parameter server, network
+helpers and device drivers. <code class="docutils literal notranslate"><span class="pre">robomaster_interface</span></code> defines their custom
+messages and services. <code class="docutils literal notranslate"><span class="pre">robomaster_examples</span></code> supplies waypoint/trajectory
+examples, fleet diagnostics and joystick control. Simulation is documented
+separately in <a class="reference internal" href="simulation.html#simulation"><span class="std std-ref">Simulation</span></a>.</p>
+<section id="namespaces-and-availability">
+<h2>Namespaces and availability<a class="headerlink" href="#namespaces-and-availability" title="Link to this heading"></a></h2>
+<p>The server uses root fleet services. Each device node is created in its own
+namespace: a device named <code class="docutils literal notranslate"><span class="pre">rmtt_1</span></code> has node name <code class="docutils literal notranslate"><span class="pre">/rmtt_1/rmtt_1</span></code> and topics
+such as <code class="docutils literal notranslate"><span class="pre">/rmtt_1/image</span></code>. Replace <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> below with the configured name.
+Sensor flags and detected model capabilities control endpoint creation; not
+every robot provides every endpoint.</p>
 </section>
-<section id="interfaces">
-<h2>Interfaces<a class="headerlink" href="#interfaces" title="Link to this heading"></a></h2>
-<p>The <cite>robomaster_interface</cite> package provides the interface for controlling the RoboMaster robots and drones. It includes the necessary messages, services, and actions for communication between the ROS 2 nodes and the RoboMaster devices.</p>
+<section id="server-services">
+<h2>Server services<a class="headerlink" href="#server-services" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
-<th class="head"><p><strong>Type</strong></p></th>
-<th class="head"><p><strong>Description</strong></p></th>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Service type</p></th>
+<th class="head"><p>Behavior</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>GimbalAngle</p></td>
-<td><p>Message</p></td>
-<td><p>Message description for the gimbal angle of the robot.</p></td>
-</tr>
-<tr class="row-odd"><td><p>GimbalVel</p></td>
-<td><p>Message</p></td>
-<td><p>Message description for the gimbal velocity of the robot.</p></td>
-</tr>
-<tr class="row-even"><td><p>TelloMpad</p></td>
-<td><p>Message</p></td>
-<td><p>Message description for the Tello mission pad recognition.</p></td>
-</tr>
-<tr class="row-odd"><td><p>AddDrone</p></td>
-<td><p>Service</p></td>
-<td><p>Service to add a drone to the system.</p></td>
-</tr>
-<tr class="row-even"><td><p>AddRobot</p></td>
-<td><p>Service</p></td>
-<td><p>Service to add a robot to the system.</p></td>
-</tr>
-<tr class="row-odd"><td><p>RemoveRobot</p></td>
-<td><p>Service</p></td>
-<td><p>Service to remove a drone/robot from the system.</p></td>
-</tr>
-<tr class="row-even"><td><p>Takeoff</p></td>
-<td><p>Service</p></td>
-<td><p>Service to command the drone to take off.</p></td>
-</tr>
-<tr class="row-odd"><td><p>SetSpeed</p></td>
-<td><p>Service</p></td>
-<td><p>Service to set the speed of the drone.</p></td>
-</tr>
-<tr class="row-even"><td><p>TelloLED</p></td>
-<td><p>Service</p></td>
-<td><p>Service to control the LED of the Tello external module.</p></td>
-</tr>
-<tr class="row-odd"><td><p>TelloMled</p></td>
-<td><p>Service</p></td>
-<td><p>Service to control the 8x8 matrix LED of the Tello external module</p></td>
-</tr>
-<tr class="row-even"><td><p>MoveChassis</p></td>
-<td><p>Service</p></td>
-<td><p>Service to move the chassis of the robot.</p></td>
-</tr>
-<tr class="row-odd"><td><p>MoveArm</p></td>
-<td><p>Service</p></td>
-<td><p>Service to move the arm of the robot.</p></td>
-</tr>
-<tr class="row-even"><td><p>MoveGimbal</p></td>
-<td><p>Service</p></td>
-<td><p>Service to move the gimbal of the robot.</p></td>
-</tr>
-<tr class="row-odd"><td><p>Gripper</p></td>
-<td><p>Service</p></td>
-<td><p>Service to open or close the gripper of the robot.</p></td>
-</tr>
-<tr class="row-even"><td><p>RobotLED</p></td>
-<td><p>Service</p></td>
-<td><p>Service to control the LED modules of the robot.</p></td>
-</tr>
-<tr class="row-odd"><td><p>Fire</p></td>
-<td><p>Service</p></td>
-<td><p>Service to fire IR/gel-beans using the robots gimbal.</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="robomaster-ros-2">
-<h2>RoboMaster ROS 2<a class="headerlink" href="#robomaster-ros-2" title="Link to this heading"></a></h2>
-<p>The <cite>robomaster_ros2</cite> package is the main implementation of the RoboMaster server as well as several helper nodes. It provides the core functionality for controlling the RoboMaster robots and drones, including communication with the devices, handling of messages, and execution of commands.</p>
-<img alt="Connection overview" class="align-center" src="_images/connection.png" />
-<section id="robomaster-server">
-<h3>robomaster server<a class="headerlink" href="#robomaster-server" title="Link to this heading"></a></h3>
-<p>This is the main node, handles the server type framework for the RoboMaster robots and drones. It is used to configure/add/remove drones and robots as well as handles several common services.</p>
-<p>Topics and services provided by the server and the added robo/drone:</p>
-<p>List of services:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
-<th class="head"><p><strong>Type</strong></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>/add_drone</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/add_drone</span></code></p></td>
 <td><p>AddDrone</p></td>
+<td><p>Register an RMTT with address, camera and optional external-pose settings.</p></td>
 </tr>
-<tr class="row-odd"><td><p>/add_robot</p></td>
-<td><p>AddRobot</p></td>
-</tr>
-<tr class="row-even"><td><p>/remove_robot</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/remove_robot</span></code></p></td>
 <td><p>RemoveRobot</p></td>
+<td><p>Remove an RMTT by name and type <code class="docutils literal notranslate"><span class="pre">rmtt</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p>/takeoff_all</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/add_robot</span></code></p></td>
+<td><p>AddRobot</p></td>
+<td><p>Advertised, but the current handler is unimplemented.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/takeoff_all</span></code> / <code class="docutils literal notranslate"><span class="pre">/land_all</span></code></p></td>
 <td><p>Trigger</p></td>
-</tr>
-<tr class="row-even"><td><p>/land_all</p></td>
-<td><p>Trigger</p></td>
-</tr>
-<tr class="row-odd"><td><p>/drone_1/get_ns</p></td>
-<td><p>Trigger</p></td>
-</tr>
-<tr class="row-even"><td><p>/drone_1/get_battery</p></td>
-<td><p>Trigger</p></td>
-</tr>
-<tr class="row-odd"><td><p>/drone_1/set_speed</p></td>
-<td><p>SetSpeed</p></td>
-</tr>
-<tr class="row-even"><td><p>/drone_1/takeoff</p></td>
-<td><p>Takeoff</p></td>
-</tr>
-<tr class="row-odd"><td><p>/drone_1/land</p></td>
-<td><p>Trigger</p></td>
-</tr>
-<tr class="row-even"><td><p>/drone_1/hover</p></td>
-<td><p>Empty</p></td>
-</tr>
-<tr class="row-odd"><td><p>/drone_1/soft_emergency</p></td>
-<td><p>Trigger</p></td>
-</tr>
-<tr class="row-even"><td><p>/drone_1/emergency</p></td>
-<td><p>Empty</p></td>
-</tr>
-<tr class="row-odd"><td><p>/drone_1/set_led</p></td>
-<td><p>TelloLED</p></td>
-</tr>
-<tr class="row-even"><td><p>/drone_1/set_mled</p></td>
-<td><p>TelloMled</p></td>
-</tr>
-<tr class="row-odd"><td><p>/drone_1/status</p></td>
-<td><p>Trigger</p></td>
-</tr>
-<tr class="row-even"><td><p>/drone_1/reboot</p></td>
-<td><p>Empty</p></td>
-</tr>
-<tr class="row-odd"><td><p>/robot_1/get_ns</p></td>
-<td><p>Trigger</p></td>
-</tr>
-<tr class="row-even"><td><p>/robot_1/led_chassis</p></td>
-<td><p>RobotLED</p></td>
-</tr>
-<tr class="row-odd"><td><p>/robot_1/move_gimbal</p></td>
-<td><p>MoveGimbal</p></td>
-</tr>
-<tr class="row-even"><td><p>/robot_1/fire</p></td>
-<td><p>Fire</p></td>
-</tr>
-<tr class="row-odd"><td><p>/robot_1/move_arm</p></td>
-<td><p>MoveArm</p></td>
-</tr>
-<tr class="row-even"><td><p>/robot_1/gripper</p></td>
-<td><p>Gripper</p></td>
+<td><p>Created only while at least one drone is registered.</p></td>
 </tr>
 </tbody>
 </table>
-<p>List of topics (published/subscribed):</p>
+<p>Custom service names refer to <code class="docutils literal notranslate"><span class="pre">robomaster_interface/srv</span></code>. <code class="docutils literal notranslate"><span class="pre">Trigger</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Empty</span></code> and <code class="docutils literal notranslate"><span class="pre">SetBool</span></code> refer to <code class="docutils literal notranslate"><span class="pre">std_srvs/srv</span></code>.</p>
+</section>
+<section id="drone-services">
+<h2>Drone services<a class="headerlink" href="#drone-services" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
-<th class="head"><p><strong>Type</strong></p></th>
+<tr class="row-odd"><th class="head"><p>Relative endpoint</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Behavior</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>/drone_1/rmtt_server/pose</p></td>
-<td><p>Pose</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_sn</span></code>, <code class="docutils literal notranslate"><span class="pre">get_battery</span></code>, <code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<td><p>Trigger</p></td>
+<td><p>Serial number, battery percentage and flight state.</p></td>
 </tr>
-<tr class="row-odd"><td><p>/drone_1/front_tof</p></td>
-<td><p>Range</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">set_speed</span></code></p></td>
+<td><p>SetSpeed</p></td>
+<td><p>Set SDK movement speed; this does not change the normalized cmd_vel interface.</p></td>
 </tr>
-<tr class="row-even"><td><p>/drone_1/bottom_tof</p></td>
-<td><p>Range</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">takeoff</span></code></p></td>
+<td><p>Takeoff</p></td>
+<td><p>Height in metres and a sync flag.</p></td>
 </tr>
-<tr class="row-odd"><td><p>/drone_1/imu</p></td>
-<td><p>Imu</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">land</span></code>, <code class="docutils literal notranslate"><span class="pre">soft_emergency</span></code></p></td>
+<td><p>Trigger</p></td>
+<td><p>Landing or emergency landing.</p></td>
 </tr>
-<tr class="row-even"><td><p>/drone_1/attitude</p></td>
-<td><p>QuaternionStamped</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hover</span></code>, <code class="docutils literal notranslate"><span class="pre">emergency</span></code>, <code class="docutils literal notranslate"><span class="pre">reboot</span></code></p></td>
+<td><p>Empty</p></td>
+<td><p>Stop RC commands, stop motors, or reboot.</p></td>
 </tr>
-<tr class="row-odd"><td><p>/drone_1/baro</p></td>
-<td><p>FluidPressure</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">set_armed</span></code></p></td>
+<td><p>SetBool</p></td>
+<td><p>Control the flight motion gate.</p></td>
 </tr>
-<tr class="row-even"><td><p>/drone_1/mpad</p></td>
-<td><p>TelloMpad</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">set_led</span></code>, <code class="docutils literal notranslate"><span class="pre">set_mled</span></code></p></td>
+<td><p>TelloLED / TelloMled</p></td>
+<td><p>External-module RGB and matrix LEDs.</p></td>
 </tr>
-<tr class="row-odd"><td><p>/drone_1/image</p></td>
-<td><p>Image</p></td>
-</tr>
-<tr class="row-even"><td><p>/drone_1/cmd_vel</p></td>
-<td><p>Twist</p></td>
-</tr>
-<tr class="row-odd"><td><p>/drone_1/external_position</p></td>
-<td><p>PoseStamped</p></td>
-</tr>
-<tr class="row-even"><td><p>/robot_1/arm_position</p></td>
-<td><p>PointStamped</p></td>
-</tr>
-<tr class="row-odd"><td><p>/robot_1/gimbal_cmd_vel</p></td>
-<td><p>GimbalVel</p></td>
-</tr>
-<tr class="row-even"><td><p>/robot_1/cmd_vel</p></td>
-<td><p>Twist</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">move</span></code>, <code class="docutils literal notranslate"><span class="pre">goto</span></code></p></td>
+<td><p>Move / GoTo</p></td>
+<td><p>May be advertised with external positioning, but callbacks are unimplemented.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
+<section id="ground-robot-services">
+<h2>Ground robot services<a class="headerlink" href="#ground-robot-services" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Relative endpoint</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Availability / behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_sn</span></code>, <code class="docutils literal notranslate"><span class="pre">get_battery</span></code></p></td>
+<td><p>Trigger</p></td>
+<td><p>EP/Core/S1 identity and DDS-cached battery percentage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">set_armed</span></code></p></td>
+<td><p>SetBool</p></td>
+<td><p>Control chassis/gimbal motion gate; does not guard the current arm stream.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">move_chassis</span></code></p></td>
+<td><p>MoveChassis</p></td>
+<td><p>Tracked chassis movement.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">close_robot</span></code></p></td>
+<td><p>Empty</p></td>
+<td><p>Close the device connection.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">led_chassis</span></code></p></td>
+<td><p>RobotLED</p></td>
+<td><p>Chassis armor LEDs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">set_armor_sensitivity</span></code></p></td>
+<td><p>SetArmorSensitivity</p></td>
+<td><p>Available when armor support is enabled.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">move_gimbal</span></code>, <code class="docutils literal notranslate"><span class="pre">reset_gimbal</span></code></p></td>
+<td><p>MoveGimbal / Trigger</p></td>
+<td><p>Models with a gimbal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">led_gimbal</span></code>, <code class="docutils literal notranslate"><span class="pre">led_blaster</span></code>, <code class="docutils literal notranslate"><span class="pre">fire</span></code></p></td>
+<td><p>GimbalLED / BlasterLED / Fire</p></td>
+<td><p>Models with a gimbal/blaster.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">move_arm</span></code>, <code class="docutils literal notranslate"><span class="pre">move_arm_to</span></code></p></td>
+<td><p>MoveArm</p></td>
+<td><p>EP Core relative/absolute arm actions with optional completion wait.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">recenter_arm</span></code>, <code class="docutils literal notranslate"><span class="pre">reset_arm</span></code>, <code class="docutils literal notranslate"><span class="pre">cancel_arm</span></code></p></td>
+<td><p>Trigger</p></td>
+<td><p>EP Core tracked-action lifecycle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gripper</span></code></p></td>
+<td><p>Gripper</p></td>
+<td><p>EP Core percentage command, accepted asynchronously.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gripper_command</span></code>, <code class="docutils literal notranslate"><span class="pre">set_gripper_mode</span></code></p></td>
+<td><p>GripperCommand / SetGripperMode</p></td>
+<td><p>EP Core named operations and timed/feedback control.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="topics-and-units">
+<h2>Topics and units<a class="headerlink" href="#topics-and-units" title="Link to this heading"></a></h2>
+<p>The endpoint is <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/&lt;topic&gt;</span></code> unless stated otherwise. Standard message
+names below come from <code class="docutils literal notranslate"><span class="pre">geometry_msgs/msg</span></code> or <code class="docutils literal notranslate"><span class="pre">sensor_msgs/msg</span></code>; named
+RoboMaster messages come from <code class="docutils literal notranslate"><span class="pre">robomaster_interface/msg</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Device / topic</p></th>
+<th class="head"><p>Message</p></th>
+<th class="head"><p>Direction / semantics</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Both: <code class="docutils literal notranslate"><span class="pre">image</span></code></p></td>
+<td><p>sensor_msgs/Image</p></td>
+<td><p>Published raw bgr8 frames; best-effort, volatile, depth 1.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Drone: <code class="docutils literal notranslate"><span class="pre">cmd_vel</span></code></p></td>
+<td><p>Twist</p></td>
+<td><p>Subscribed normalized RC inputs in [-1, 1]; not m/s or rad/s.</p></td>
+</tr>
+<tr class="row-even"><td><p>Drone: <code class="docutils literal notranslate"><span class="pre">front_tof</span></code>, <code class="docutils literal notranslate"><span class="pre">bottom_tof</span></code></p></td>
+<td><p>Range</p></td>
+<td><p>Enabled distance sensors.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Drone: <code class="docutils literal notranslate"><span class="pre">attitude</span></code></p></td>
+<td><p>QuaternionStamped</p></td>
+<td><p>Enabled attitude telemetry.</p></td>
+</tr>
+<tr class="row-even"><td><p>Drone: <code class="docutils literal notranslate"><span class="pre">baro</span></code>, <code class="docutils literal notranslate"><span class="pre">imu</span></code>, <code class="docutils literal notranslate"><span class="pre">mpad</span></code></p></td>
+<td><p>FluidPressure / Imu / TelloMpad</p></td>
+<td><p>Optional telemetry; barometer/IMU unit handling remains incomplete.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Drone: <code class="docutils literal notranslate"><span class="pre">rmtt_server/pose</span></code></p></td>
+<td><p>Pose</p></td>
+<td><p>Republished external-pose input when enabled.</p></td>
+</tr>
+<tr class="row-even"><td><p>Ground: <code class="docutils literal notranslate"><span class="pre">cmd_vel</span></code></p></td>
+<td><p>Twist</p></td>
+<td><p>Subscribed chassis translation in m/s and yaw in rad/s.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ground: <code class="docutils literal notranslate"><span class="pre">position</span></code></p></td>
+<td><p>PoseStamped</p></td>
+<td><p>DDS position with quaternion orientation from chassis attitude.</p></td>
+</tr>
+<tr class="row-even"><td><p>Gimbal: <code class="docutils literal notranslate"><span class="pre">gimbal_cmd_vel</span></code></p></td>
+<td><p>GimbalVel</p></td>
+<td><p>Subscribed pitch/yaw speed in degrees/second.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gimbal: <code class="docutils literal notranslate"><span class="pre">gimbal_angle</span></code></p></td>
+<td><p>GimbalAngle</p></td>
+<td><p>Enabled angle feedback.</p></td>
+</tr>
+<tr class="row-even"><td><p>EP Core: <code class="docutils literal notranslate"><span class="pre">arm_cmd_vel</span></code></p></td>
+<td><p>Twist</p></td>
+<td><p>Subscribed X/Z stream velocities in m/s; independent of the motion gate.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EP Core: <code class="docutils literal notranslate"><span class="pre">arm_position</span></code></p></td>
+<td><p>PointStamped</p></td>
+<td><p>Enabled legacy arm DDS feedback; service command units must not be inferred from this topic.</p></td>
+</tr>
+<tr class="row-even"><td><p>EP Core: <code class="docutils literal notranslate"><span class="pre">arm_action_status</span></code></p></td>
+<td><p>ArmActionStatus</p></td>
+<td><p>Tracked service action ID, state, progress and completion.</p></td>
+</tr>
+<tr class="row-odd"><td><p>EP Core: <code class="docutils literal notranslate"><span class="pre">gripper_state</span></code></p></td>
+<td><p>GripperState</p></td>
+<td><p>Hardware endpoint status plus estimated percentage, mode and operation state.</p></td>
+</tr>
+<tr class="row-even"><td><p>Armor: <code class="docutils literal notranslate"><span class="pre">armor_hit</span></code>, <code class="docutils literal notranslate"><span class="pre">ir_hit</span></code></p></td>
+<td><p>ArmorHit / IrHit</p></td>
+<td><p>Event topics; silence can be normal.</p></td>
+</tr>
+</tbody>
+</table>
+<p>External pose subscriptions use the configured <code class="docutils literal notranslate"><span class="pre">ext_pose_topic_name</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ext_pose_topic_type</span></code>. There is no fixed <code class="docutils literal notranslate"><span class="pre">external_position</span></code> input topic.
+The real driver does not create a positioning system from these settings.</p>
+<p>Camera publication is direct; the driver creates no compressed image topic or
+camera bridge. Most other topics use reliable QoS. Arm velocity uses depth 20
+and gimbal velocity depth 60. See <a class="reference internal" href="howto.html#howtos"><span class="std std-ref">Using the hardware driver</span></a> for lifecycle/units and
+<a class="reference internal" href="fleet_tools.html#fleet-tools"><span class="std std-ref">Fleet diagnostics and joystick control</span></a> for current example limitations.</p>
 </section>
 </section>
 

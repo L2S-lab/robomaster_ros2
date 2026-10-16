@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>How To &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
+  <title>Using the hardware driver &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=036e6a88"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Simulation" href="simulation.html" />
+    <link rel="next" title="Fleet diagnostics and joystick control" href="fleet_tools.html" />
     <link rel="prev" title="Configuration" href="configuration.html" /> 
 </head>
 
@@ -44,16 +44,22 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Packages and ROS API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How To</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#setup-wi-fi-for-rmtt-and-rmep">Setup Wi-Fi for RMTT and RMEP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#start-the-robomaster-server">Start the robomaster server</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using the hardware driver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#network-and-startup">Network and startup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#direct-camera-images">Direct camera images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motion-gate-and-telemetry">Motion gate and telemetry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#leds-and-armor">LEDs and armor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ep-core-gripper">EP Core gripper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ep-core-tracked-arm-services">EP Core tracked arm services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ep-core-arm-velocity-stream">EP Core arm velocity stream</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="fleet_tools.html">Fleet diagnostics and joystick control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Command-line and trajectory examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting and current limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 
         </div>
@@ -70,7 +76,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">How To</li>
+      <li class="breadcrumb-item active">Using the hardware driver</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/howto.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,66 +86,146 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="how-to">
-<span id="howtos"></span><h1>How To<a class="headerlink" href="#how-to" title="Link to this heading"></a></h1>
-<section id="setup-wi-fi-for-rmtt-and-rmep">
-<h2>Setup Wi-Fi for RMTT and RMEP<a class="headerlink" href="#setup-wi-fi-for-rmtt-and-rmep" title="Link to this heading"></a></h2>
-<p>All the drones and robots are tested with 2.4 GHz Wi-Fi network.
-It is advisible to assign static IPs to the RMTT drones and RMEP robots using the router settings and label the robots and drones with their IPs for ease of use.
-If dynamic IP are used, enable <cite>random_assign</cite> option in the <cite>robomaster_server.yaml</cite> file.</p>
-<p>Use the <cite>setup_wifi.yaml</cite> file to setup the configuration required.</p>
-<p>Drones:</p>
-<p>Connect the external module to the RMTT drones, switch the connection mode to <strong>direct</strong> (AP mode) connection and power on all the drones.</p>
-<img alt="External module" class="align-center" src="_images/ext_module.jpg" />
-<p>Robots:</p>
-<p>Turn on the robots and switch the connection mode to <strong>router</strong> connection.</p>
-<img alt="EP Wi-Fi settings" class="align-center" src="_images/ep-wifi.png" />
-<p>Once all the drones and robots are powered on, run the following command.</p>
+  <section id="using-the-hardware-driver">
+<span id="howtos"></span><h1>Using the hardware driver<a class="headerlink" href="#using-the-hardware-driver" title="Link to this heading"></a></h1>
+<section id="network-and-startup">
+<h2>Network and startup<a class="headerlink" href="#network-and-startup" title="Link to this heading"></a></h2>
+<p>Connect the PC and devices to the same LAN. Configure the PC’s LAN address,
+device names, counts and IPs in the files described in <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">Configuration</span></a>.
+For static assignment, give each device a stable address and set
+<code class="docutils literal notranslate"><span class="pre">random_assign:</span> <span class="pre">false</span></code>. Discovery assigns found devices in sorted IP order;
+it does not establish permanent identity-to-name mapping.</p>
+<p>For initial Wi-Fi setup, edit <code class="docutils literal notranslate"><span class="pre">setup_wifi.yaml</span></code> and run the helper. RMTTs
+begin in direct/AP mode for configuration, then must be switched to router/STA
+mode. EP devices use router mode and the generated QR code:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>install/setup.bash
 ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>setup_wifi.launch.py
 </pre></div>
 </div>
-<p>This will connect your PC to the RMTT drones one by one and excecute the necessary commands to set up the Wi-Fi connection.</p>
-<p>The QR code will be displayed on seperate window. press the red/white small button on the side of the robot’s connection switch and scan it using the robot’s camera to connect the robot to the Wi-Fi network.</p>
-<p>Once the setup is done, drones need turn off and switch to the <strong>router</strong> (STA mode) connection mode.
-Now when the drones are powered on, they will connect to the Wi-Fi network and propeller will start spinning at low speed. This indicates the connection is successful. (It can take couple of minutes)</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>You can flip the drone &gt;90° to stop the propellers.</p>
+<p>The optional IP/serial helper uses <code class="docutils literal notranslate"><span class="pre">retrive_robot_info.yaml</span></code> and writes
+<code class="docutils literal notranslate"><span class="pre">sn_to_name.yaml</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>retrive_robot_info.launch.py
+</pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This setup procedure is generally only required once. If a drone or robot is unable to connect to the network, repeat the setup process for the specific robot/drone.</p>
+<p>Start the server with the configured YAML values:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>robomaster_server.launch.py
+</pre></div>
 </div>
+<p>For explicit counts, also supply the intended LAN address. For example, after
+setting <code class="docutils literal notranslate"><span class="pre">ROBOT_LAN_IP</span></code> to the PC’s address:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>robomaster_server.launch.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>num_of_drones:<span class="o">=</span><span class="m">1</span><span class="w"> </span>num_of_eps1:<span class="o">=</span><span class="m">1</span><span class="w"> </span>local_ip:<span class="o">=</span><span class="s2">"</span><span class="nv">$ROBOT_LAN_IP</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>random_assign:<span class="o">=</span><span class="nb">false</span><span class="w"> </span>keyboard_cmd:<span class="o">=</span><span class="nb">false</span>
+</pre></div>
+</div>
+<p>When keyboard control is enabled, Alt+A arms all registered drones, Alt+T
+requests takeoff, Alt+L requests landing and Alt+E requests emergency stop.
+Disable server keyboard shortcuts when another tool owns motion commands.</p>
 </section>
-<section id="start-the-robomaster-server">
-<h2>Start the robomaster server<a class="headerlink" href="#start-the-robomaster-server" title="Link to this heading"></a></h2>
-<p>Once all the drones, robots and PC are connected to the Wi-Fi network, robomaster server can be started.</p>
-<p>Check the <cite>rmtt_param.yaml</cite> and <cite>rmep_param.yaml</cite> files to ensure the parameters are set correctly for the drones and robots.</p>
-<p>Check the <cite>robomaster_server.yaml</cite> file to ensure the local IP, number of drones and robots are set correctly.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>install/setup.bash
-ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_ros2<span class="w"> </span>robomaster_server.launch.py
+<section id="direct-camera-images">
+<h2>Direct camera images<a class="headerlink" href="#direct-camera-images" title="Link to this heading"></a></h2>
+<p>Enable <code class="docutils literal notranslate"><span class="pre">pub_cam</span></code> for the intended devices. Both RMTT and EP/Core drivers
+publish directly on <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/image</span></code> using <code class="docutils literal notranslate"><span class="pre">sensor_msgs/msg/Image</span></code> with
+<code class="docutils literal notranslate"><span class="pre">bgr8</span></code> encoding. QoS is best-effort, volatile and depth one. In RViz choose
+the raw image topic and Best Effort reliability; a reliable-only subscriber
+does not match this publisher.</p>
+<p>Video is decoded with PyAV. The ROS header uses the device name as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code>
+and the node clock at publication as the timestamp. <code class="docutils literal notranslate"><span class="pre">publish_fps</span></code> is a ceiling,
+not a guaranteed delivered frequency: Wi-Fi, device capture, decoding and
+subscriber load can reduce it. No compression plugin or extra bridge process
+is used. Standard ROS topic remapping applies to the direct publisher.</p>
+<p>RMTT FPS, bitrate and resolution live under <code class="docutils literal notranslate"><span class="pre">rmtt.camera</span></code>; direction is
+selected per drone. EP/Core supports 360p, 540p and 720p and receives the device
+video stream on TCP port 40921. See <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">Configuration</span></a> for camera controls.
+Stopping/removing a device stops its video path; the device node owns its ROS
+publisher. The optional legacy <code class="docutils literal notranslate"><span class="pre">libmedia_codec</span></code> binding is for EP audio only.</p>
+</section>
+<section id="motion-gate-and-telemetry">
+<h2>Motion gate and telemetry<a class="headerlink" href="#motion-gate-and-telemetry" title="Link to this heading"></a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">set_armed</span></code> for the chassis/gimbal or RMTT flight gate when arming is
+required:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmtt_1/set_armed<span class="w"> </span>std_srvs/srv/SetBool<span class="w"> </span><span class="s2">"{data: true}"</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmep_1/set_armed<span class="w"> </span>std_srvs/srv/SetBool<span class="w"> </span><span class="s2">"{data: true}"</span>
 </pre></div>
 </div>
-<p>Launch arguments for <cite>robomaster_server.launch.py</cite>:</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This values will override the parameters indicated in the <cite>robomaster_server.yaml</cite> file if num_of_drones or num_of_eps1 are non zero.</p>
-</div>
-<ul class="simple">
-<li><p><cite>num_of_drones</cite>: Number of drones to be added in the server</p></li>
-<li><p><cite>num_of_eps1</cite>: Number of eps1 to be added in the server</p></li>
-<li><p><cite>local_ip</cite>: Local IP address of the computer running the server</p></li>
-<li><p><cite>random_assign</cite>: Random assignment for drone/robot allocation</p></li>
-<li><p><cite>keyboard_cmd</cite>: Enable keyboard command control for drones</p></li>
-</ul>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Keyboard commands:
-Press &lt;alt&gt;+a to arm all the drones
-Press &lt;alt&gt;+e for an emergency call to all drones
-Press &lt;alt&gt;+l to land all drones
-Press &lt;alt&gt;+t to takeoff all drones
+<p>Refresh non-zero gated velocities within the configured <code class="docutils literal notranslate"><span class="pre">command_timeout</span></code>.
+Expiry sends chassis/gimbal zeros or an RMTT RC hover command. A latched
+expiry requires rearming. Disarming explicitly stops these gated channels.
+This gate does not cover the current EP arm velocity stream.</p>
+<p>Enable <code class="docutils literal notranslate"><span class="pre">pub_position</span></code> for <code class="docutils literal notranslate"><span class="pre">/&lt;robot&gt;/position</span></code> (PoseStamped). Publication
+waits for position and chassis-attitude samples, and orientation is a quaternion
+with yaw relative to the first attitude sample. This is chassis telemetry,
+not externally measured world pose. <code class="docutils literal notranslate"><span class="pre">pub_gimbal_angle</span></code> enables GimbalAngle
+feedback on models with a gimbal. EP battery percentage comes from DDS;
+<code class="docutils literal notranslate"><span class="pre">get_battery</span></code> returns failure until a battery sample is available.</p>
+</section>
+<section id="leds-and-armor">
+<h2>LEDs and armor<a class="headerlink" href="#leds-and-armor" title="Link to this heading"></a></h2>
+<p>Ground robots provide <code class="docutils literal notranslate"><span class="pre">led_chassis</span></code>. Gimbal-equipped robots additionally
+provide <code class="docutils literal notranslate"><span class="pre">led_gimbal</span></code> and <code class="docutils literal notranslate"><span class="pre">led_blaster</span></code>. RGB channels use 0–255; gimbal LED
+indices are 0–7 and an empty selection uses the driver’s default indices 0–3.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmep_1/led_blaster<span class="w"> </span>robomaster_interface/srv/BlasterLED<span class="w"> </span><span class="s2">"{'on': true, brightness: 128}"</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmtt_1/set_mled<span class="w"> </span>robomaster_interface/srv/TelloMled<span class="w"> </span><span class="s2">"{brightness: 64, color: 'r', mled_char: 'A', graph: '', scroll_dir: '', freq: 0.0}"</span>
 </pre></div>
 </div>
+<p>RMTT matrix LEDs accept a character or a 64-character custom graph using
+<code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">r</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">p</span></code>. Armor support publishes <code class="docutils literal notranslate"><span class="pre">armor_hit</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ir_hit</span></code> events and exposes <code class="docutils literal notranslate"><span class="pre">set_armor_sensitivity</span></code>. The armor topic includes
+component/type/strength; IR feedback includes cumulative count and receiver
+metadata. Event topics do not need to publish continuously.</p>
+</section>
+<section id="ep-core-gripper">
+<h2>EP Core gripper<a class="headerlink" href="#ep-core-gripper" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">gripper</span></code> accepts percentage targets 0, 25, 50, 75 and 100, returning after
+acceptance. <code class="docutils literal notranslate"><span class="pre">gripper_state</span></code> reports busy/completion state and the estimate.
+<code class="docutils literal notranslate"><span class="pre">gripper_command</span></code> accepts <code class="docutils literal notranslate"><span class="pre">open</span></code>, <code class="docutils literal notranslate"><span class="pre">close</span></code>, <code class="docutils literal notranslate"><span class="pre">pause</span></code> or <code class="docutils literal notranslate"><span class="pre">reset</span></code>;
+<code class="docutils literal notranslate"><span class="pre">set_gripper_mode</span></code> selects <code class="docutils literal notranslate"><span class="pre">timed</span></code> or <code class="docutils literal notranslate"><span class="pre">feedback</span></code> control.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmep_1/gripper<span class="w"> </span>robomaster_interface/srv/Gripper<span class="w"> </span><span class="s2">"{distance: 100}"</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmep_1/set_gripper_mode<span class="w"> </span>robomaster_interface/srv/SetGripperMode<span class="w"> </span><span class="s2">"{mode: 'feedback'}"</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmep_1/gripper_command<span class="w"> </span>robomaster_interface/srv/GripperCommand<span class="w"> </span><span class="s2">"{command: 'pause', power: 0}"</span>
+</pre></div>
+</div>
+<p>Hardware feedback reports only opened/closed/normal, not a continuous percentage.
+Feedback mode confirms endpoints; intermediate targets use calibrated timing.
+At startup, or after an interrupted/failed movement invalidates the estimate,
+command an endpoint before an intermediate target. Recalibrate full-travel time
+if the configured power changes.</p>
+</section>
+<section id="ep-core-tracked-arm-services">
+<h2>EP Core tracked arm services<a class="headerlink" href="#ep-core-tracked-arm-services" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">move_arm</span></code> is relative and <code class="docutils literal notranslate"><span class="pre">move_arm_to</span></code> absolute, using X/Z metres. The
+response contains acceptance, action ID, state, percentage and completion.
+Relative moves clamp X to +/-0.22 m and Z to +/-0.15 m; out-of-range absolute
+targets are rejected. Optional completion waits must be finite and at most
+60 seconds; a non-positive request timeout selects <code class="docutils literal notranslate"><span class="pre">arm.completion_timeout</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmep_1/move_arm<span class="w"> </span>robomaster_interface/srv/MoveArm<span class="w"> </span><span class="s2">"{x: 0.02, z: 0.01, wait_for_completion: false, timeout: 0.0}"</span>
+ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/rmep_1/cancel_arm<span class="w"> </span>std_srvs/srv/Trigger<span class="w"> </span><span class="s2">"{}"</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">arm_action_status</span></code> describes tracked actions. <code class="docutils literal notranslate"><span class="pre">recenter_arm</span></code> starts an
+absolute move to zero; <code class="docutils literal notranslate"><span class="pre">reset_arm</span></code> cancels an active action and recenters,
+because there is no distinct implemented SDK hardware reset. <code class="docutils literal notranslate"><span class="pre">arm_position</span></code>
+is a legacy PointStamped topic that passes DDS values through; do not infer
+its units from the metre-based service interface.</p>
+</section>
+<section id="ep-core-arm-velocity-stream">
+<h2>EP Core arm velocity stream<a class="headerlink" href="#ep-core-arm-velocity-stream" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/arm_cmd_vel</span></code> accepts Twist <code class="docutils literal notranslate"><span class="pre">linear.x</span></code> and <code class="docutils literal notranslate"><span class="pre">linear.z</span></code> in m/s.
+Other components are ignored. The current server uses 20 Hz timer output,
+clamps each velocity to +/-0.20 m/s and each relative increment to +/-0.03 m,
+and stops issuing increments after 0.25 seconds without a command. The deadline
+uses the ROS node clock. An increment already dispatched can finish.</p>
+<p>These settings are driver constructor defaults, not YAML/launch parameters.
+Zero X/Z velocities stop new increments. The stream skips dispatch while a
+tracked arm action is observed busy; stream increments themselves are untracked.</p>
+<p>Current limitations: the stream does not check <code class="docutils literal notranslate"><span class="pre">set_armed</span></code> or explicitly
+reject NaN/Inf, and disarm/expiry do not clear the cached command. The busy check
+and dispatch are separate, so concurrent streaming and tracked services do not
+have an atomic priority handoff. Stop the streaming publisher and send an
+explicit zero instead of relying on disarm to stop this arm path. These are
+implementation limits, not functionality supplied by the motion gate.</p>
+<p>See <a class="reference internal" href="fleet_tools.html#fleet-tools"><span class="std std-ref">Fleet diagnostics and joystick control</span></a> for joystick and diagnostic behavior, including their
+current monitoring and stop limitations.</p>
 </section>
 </section>
 
@@ -148,7 +234,7 @@ Press &lt;alt&gt;+t to takeoff all drones
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="simulation.html" class="btn btn-neutral float-right" title="Simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="fleet_tools.html" class="btn btn-neutral float-right" title="Fleet diagnostics and joystick control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -6,20 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frequently Asked Questions &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
+  <title>Troubleshooting and current limits &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=036e6a88"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
+    <link rel="next" title="Simulation" href="simulation.html" />
+    <link rel="prev" title="Command-line and trajectory examples" href="tutorials.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,12 +44,21 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Packages and ROS API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">Using the hardware driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fleet_tools.html">Fleet diagnostics and joystick control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Command-line and trajectory examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting and current limits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#no-image-or-a-low-publication-rate">No image or a low publication rate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fleet-diagnostics-say-telemetry-failed">Fleet diagnostics say telemetry failed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#an-arm-or-joystick-stream-ignores-an-expected-stop">An arm or joystick stream ignores an expected stop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gripper-feedback-is-not-a-continuous-percentage">Gripper feedback is not a continuous percentage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#missing-endpoint-or-service-failure">Missing endpoint or service failure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reporting-problems">Reporting problems</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Frequently Asked Questions</a></li>
 </ul>
 
         </div>
@@ -65,7 +75,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Frequently Asked Questions</li>
+      <li class="breadcrumb-item active">Troubleshooting and current limits</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/faq.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -75,16 +85,67 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="frequently-asked-questions">
-<span id="faq"></span><h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Link to this heading"></a></h1>
-<p>For any questions related to the package, please open an issue on the <a class="reference external" href="https://github.com/L2S-lab/robomaster_ros2/issues">github</a> page.</p>
+  <section id="troubleshooting-and-current-limits">
+<span id="faq"></span><h1>Troubleshooting and current limits<a class="headerlink" href="#troubleshooting-and-current-limits" title="Link to this heading"></a></h1>
+<section id="no-image-or-a-low-publication-rate">
+<h2>No image or a low publication rate<a class="headerlink" href="#no-image-or-a-low-publication-rate" title="Link to this heading"></a></h2>
+<p>Enable the device’s camera, select <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/image</span></code> as a raw Image topic and
+use Best Effort reliability. Reliable-only subscriptions do not match camera
+QoS. Source the local workspace overlay after rebuilding, particularly when
+switching from another checkout or an older camera implementation.</p>
+<p><code class="docutils literal notranslate"><span class="pre">publish_fps</span></code> is an upper bound. Actual delivery also depends on camera FPS,
+bitrate/resolution, Wi-Fi contention, decoding and subscriber load. Camera
+messages use the node clock at publication, not a hardware capture timestamp.
+The driver publishes raw images directly and starts no camera bridge process.
+PyAV is required for video; the optional legacy SDK binding is for EP audio.</p>
+</section>
+<section id="fleet-diagnostics-say-telemetry-failed">
+<h2>Fleet diagnostics say telemetry failed<a class="headerlink" href="#fleet-diagnostics-say-telemetry-failed" title="Link to this heading"></a></h2>
+<p>The current fleet monitor requests reliable QoS, so best-effort images can have
+zero counts despite a working camera. It can also subscribe to silent armor/IR
+events and other command topics and then require a message. Use
+<code class="docutils literal notranslate"><span class="pre">--no-topic-monitor</span></code> for service-only diagnostics and interpret topic failures
+with the limitations in <a class="reference internal" href="fleet_tools.html#fleet-tools"><span class="std std-ref">Fleet diagnostics and joystick control</span></a>.</p>
+</section>
+<section id="an-arm-or-joystick-stream-ignores-an-expected-stop">
+<h2>An arm or joystick stream ignores an expected stop<a class="headerlink" href="#an-arm-or-joystick-stream-ignores-an-expected-stop" title="Link to this heading"></a></h2>
+<p>The EP arm velocity stream is not guarded by <code class="docutils literal notranslate"><span class="pre">set_armed</span></code> and uses a ROS-clock
+deadline without clearing cached velocity on expiry/disarm. The joystick node
+has no input-loss watchdog and can continue republishing cached input; target
+changes and shutdown do not explicitly zero the previous target. See
+<a class="reference internal" href="howto.html#howtos"><span class="std std-ref">Using the hardware driver</span></a> and <a class="reference internal" href="fleet_tools.html#fleet-tools"><span class="std std-ref">Fleet diagnostics and joystick control</span></a> for the actual stop behavior. These are
+current code limitations, not configuration options that enable hidden guards.</p>
+</section>
+<section id="gripper-feedback-is-not-a-continuous-percentage">
+<h2>Gripper feedback is not a continuous percentage<a class="headerlink" href="#gripper-feedback-is-not-a-continuous-percentage" title="Link to this heading"></a></h2>
+<p>Hardware reports opened/closed/normal. Intermediate percentages use a timing
+estimate, including in feedback mode. Establish an endpoint after startup or
+after the estimate is invalidated. Recalibrate the full-travel time when power
+changes.</p>
+</section>
+<section id="missing-endpoint-or-service-failure">
+<h2>Missing endpoint or service failure<a class="headerlink" href="#missing-endpoint-or-service-failure" title="Link to this heading"></a></h2>
+<p>Endpoints depend on sensor flags and detected model capabilities. EP Core arm
+services and EP/S1 gimbal services are not interchangeable. Battery requests
+can fail before a DDS sample arrives. The server’s AddRobot handler and drone
+move/goto callbacks are unimplemented. Barometer/IMU unit handling and some
+legacy arm feedback semantics remain incomplete.</p>
+</section>
+<section id="reporting-problems">
+<h2>Reporting problems<a class="headerlink" href="#reporting-problems" title="Link to this heading"></a></h2>
+<p>Include the source revision, device models/names, launch command, relevant
+configuration, sourced workspace and complete error output. Use the project’s
+GitHub issue tracker at
+<a class="reference external" href="https://github.com/L2S-lab/robomaster_ros2/issues">https://github.com/L2S-lab/robomaster_ros2/issues</a>.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorials.html" class="btn btn-neutral float-left" title="Command-line and trajectory examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="simulation.html" class="btn btn-neutral float-right" title="Simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

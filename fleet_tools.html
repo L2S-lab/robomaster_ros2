@@ -1,0 +1,393 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fleet diagnostics and joystick control &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=036e6a88"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command-line and trajectory examples" href="tutorials.html" />
+    <link rel="prev" title="Using the hardware driver" href="howto.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            RoboMaster ROS 2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Packages and ROS API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">Using the hardware driver</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Fleet diagnostics and joystick control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fleet-diagnostics">Fleet diagnostics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#current-telemetry-monitor-limitations">Current telemetry-monitor limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#joystick-fleet-control">Joystick fleet control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#current-stop-behavior">Current stop behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-node-parameters">Additional node parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Command-line and trajectory examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting and current limits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RoboMaster ROS 2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Fleet diagnostics and joystick control</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/fleet_tools.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="fleet-diagnostics-and-joystick-control">
+<span id="fleet-tools"></span><h1>Fleet diagnostics and joystick control<a class="headerlink" href="#fleet-diagnostics-and-joystick-control" title="Link to this heading"></a></h1>
+<p>These examples require an already-running hardware server. Device names must
+match its registered namespaces. Configure the actual counts and LAN address
+as described in <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">Configuration</span></a>; disable server keyboard shortcuts when
+the example owns motion commands.</p>
+<section id="fleet-diagnostics">
+<h2>Fleet diagnostics<a class="headerlink" href="#fleet-diagnostics" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">fleet_stress_test</span></code> defaults to five drones (<code class="docutils literal notranslate"><span class="pre">rmtt_1</span></code> through <code class="docutils literal notranslate"><span class="pre">rmtt_5</span></code>),
+two robots (<code class="docutils literal notranslate"><span class="pre">rmep_1</span></code> and <code class="docutils literal notranslate"><span class="pre">rmep_2</span></code>) and the read-only <code class="docutils literal notranslate"><span class="pre">diagnostic</span></code> mode:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>robomaster_examples<span class="w"> </span>fleet_stress_test<span class="w"> </span>--mode<span class="w"> </span>diagnostic<span class="w"> </span>--rounds<span class="w"> </span><span class="m">20</span><span class="w"> </span>--duration<span class="w"> </span><span class="m">30</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">--drones</span></code> and <code class="docutils literal notranslate"><span class="pre">--robots</span></code> for comma-separated namespace lists. A smaller
+mixed-fleet invocation is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>robomaster_examples<span class="w"> </span>fleet_stress_test<span class="w"> </span>--drones<span class="w"> </span>rmtt_1<span class="w"> </span>--robots<span class="w"> </span>rmep_1
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mode</p></th>
+<th class="head"><p>Behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">diagnostic</span></code></p></td>
+<td><p>Concurrent identity/battery/state checks, service latency summaries and topic counts/rates. Sends no motion commands.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ground</span></code></p></td>
+<td><p>Also arms motion gates, calls auxiliary LED/speed services and sends zero cmd_vel streams.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">motion</span></code></p></td>
+<td><p>Also takes off and sends bounded non-zero streams; requires the exact confirmation phrase.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Motion mode requires <code class="docutils literal notranslate"><span class="pre">--confirm-motion</span> <span class="pre">MOVE_5_DRONES_2_ROBOTS</span></code>, including when
+custom namespace lists select a smaller fleet. <code class="docutils literal notranslate"><span class="pre">--speed</span></code> defaults to 0.10:
+ground translation uses m/s, while drone translation uses normalized RC input.
+The CLI help currently labels both as m/s; the underlying drone interface is
+normalized. Accepted speed inputs are 0.01–0.25. Takeoff height defaults to
+0.8 m and must be within the utility’s 0.8–1.5 m range.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rounds</span></code></p></td>
+<td><p>10</p></td>
+<td><p>Concurrent service-check rounds.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--duration</span></code></p></td>
+<td><p>10.0</p></td>
+<td><p>Observation or command-stream duration in seconds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rate</span></code></p></td>
+<td><p>20.0</p></td>
+<td><p>Command publication Hz per device.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--service-wait</span></code> / <code class="docutils literal notranslate"><span class="pre">--call-timeout</span></code></p></td>
+<td><p>20.0 / 5.0</p></td>
+<td><p>Service discovery and response deadlines in seconds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--min-battery</span></code></p></td>
+<td><p>30.0</p></td>
+<td><p>Minimum reported drone battery percentage for motion.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--preflight-delay</span></code></p></td>
+<td><p>5.0</p></td>
+<td><p>Motion-mode countdown in seconds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--deadman-wait</span></code></p></td>
+<td><p>1.0</p></td>
+<td><p>Silence interval; choose a value longer than the configured driver timeout.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--no-topic-monitor</span></code></p></td>
+<td><p>Off</p></td>
+<td><p>Skip topic subscriptions/counting; keep service diagnostics.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The report records failures, service latency and telemetry counts/rates; a
+required failure produces a non-zero exit status. Deadman observation entries
+leave physical stop/hover confirmation to the operator rather than measuring
+device motion automatically. Hazardous/disruptive APIs such as firing, reboot,
+emergency and arm/gripper/gimbal movement are inventoried without being invoked.</p>
+<p>Ground/motion cleanup attempts zero commands and disarming. If flight was
+attempted it also attempts hover and landing. Cleanup covers normal completion,
+Ctrl-C and SIGTERM; diagnostic mode does not run those motion cleanup calls.</p>
+<section id="current-telemetry-monitor-limitations">
+<h3>Current telemetry-monitor limitations<a class="headerlink" href="#current-telemetry-monitor-limitations" title="Link to this heading"></a></h3>
+<p>The monitor discovers advertised topics below fleet namespaces and excludes
+only names ending in <code class="docutils literal notranslate"><span class="pre">/cmd_vel</span></code>. It subscribes with reliable depth-10 QoS and
+requires at least one message on every monitored topic. Therefore:</p>
+<ul class="simple">
+<li><p>Best-effort camera publishers do not match these reliable subscriptions.
+A zero image count can be a QoS mismatch, not a failed camera.</p></li>
+<li><p>Silent armor/IR events and other command topics can be included and marked
+failed even though no event or command was expected.</p></li>
+</ul>
+<p>Interpret topic failures with those limits in mind. For service-only checks,
+use <code class="docutils literal notranslate"><span class="pre">--no-topic-monitor</span></code>; inspect cameras with a best-effort image subscriber.</p>
+</section>
+</section>
+<section id="joystick-fleet-control">
+<h2>Joystick fleet control<a class="headerlink" href="#joystick-fleet-control" title="Link to this heading"></a></h2>
+<p>Install <code class="docutils literal notranslate"><span class="pre">ros-humble-joy</span></code> as described in <a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a>. The current
+examples manifest does not declare every joystick/launch runtime dependency,
+so a successful package build alone does not guarantee the input node is present.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>robomaster_examples<span class="w"> </span>joy_fleet_teleop.launch.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>robot_names:<span class="o">=</span>rmep_1,rmep_2<span class="w"> </span>drone_names:<span class="o">=</span>rmtt_1,rmtt_2<span class="w"> </span>start_mode:<span class="o">=</span>robot
+</pre></div>
+</div>
+<p>The launcher starts <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> and <code class="docutils literal notranslate"><span class="pre">joy_fleet_teleop</span></code>. It does not explicitly
+configure joystick autorepeat; do not confuse Joy input frequency with the
+teleop node’s default 20 Hz output timer.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Launch argument</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">robot_names</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rmep_1</span></code></p></td>
+<td><p>Comma-separated robot namespaces.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">drone_names</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rmtt_1</span></code></p></td>
+<td><p>Comma-separated drone namespaces.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">drone</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">robot</span></code> or <code class="docutils literal notranslate"><span class="pre">drone</span></code>. Target cycling stays within this mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">takeoff_height</span></code></p></td>
+<td><p>1.0</p></td>
+<td><p>Drone takeoff height in metres.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">require_deadman</span></code></p></td>
+<td><p>true</p></td>
+<td><p>Require L1 for velocity commands.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The node consumes <code class="docutils literal notranslate"><span class="pre">/joy</span></code> (sensor_msgs/Joy). Indices below are zero-based and
+follow the actual callback bindings; X is index 3 and Y index 2 even if a
+controller’s printed labels or an older help string use another order.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Button / index</p></th>
+<th class="head"><p>Robot mode</p></th>
+<th class="head"><p>Drone mode</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Start / 7</p></td>
+<td><p>Toggle selected robot motion gate.</p></td>
+<td><p>Toggle selected drone motion gate.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Select / 6</p></td>
+<td><p>Cycle robot targets.</p></td>
+<td><p>Cycle drone targets.</p></td>
+</tr>
+<tr class="row-even"><td><p>L1 / 4</p></td>
+<td><p>Hold for non-zero velocity input.</p></td>
+<td><p>Hold for non-zero velocity input.</p></td>
+</tr>
+<tr class="row-odd"><td><p>R1 / 5</p></td>
+<td><p>Right stick controls gimbal; chassis yaw is zero.</p></td>
+<td><p>No binding.</p></td>
+</tr>
+<tr class="row-even"><td><p>B / 0</p></td>
+<td><p>Close gripper.</p></td>
+<td><p>No binding.</p></td>
+</tr>
+<tr class="row-odd"><td><p>A / 1</p></td>
+<td><p>Open gripper.</p></td>
+<td><p>Hover.</p></td>
+</tr>
+<tr class="row-even"><td><p>X / 3</p></td>
+<td><p>Reset gripper.</p></td>
+<td><p>Take off.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Y / 2</p></td>
+<td><p>Pause gripper.</p></td>
+<td><p>Land.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Left-stick axes 0/1 control planar translation; right-stick X (axis 3) controls
+yaw. Holding R1 in robot mode uses axes 3/4 for gimbal yaw/pitch. D-pad axis 7
+controls arm X and axis 6 arm Z. In drone mode, L2 axis 2 ascends and R2 axis 5
+descends when the value exceeds 0.5. A different controller layout must match
+these indices before its labels can be relied upon.</p>
+<p>L1 gates velocity output only, not button-triggered service calls. Start calls
+<code class="docutils literal notranslate"><span class="pre">set_armed</span></code>; its protection is limited to the driver’s gated paths and does
+not guard the current arm velocity stream.</p>
+<section id="current-stop-behavior">
+<h3>Current stop behavior<a class="headerlink" href="#current-stop-behavior" title="Link to this heading"></a></h3>
+<p>There is no joystick-disconnect watchdog or <code class="docutils literal notranslate"><span class="pre">joy_timeout</span></code> parameter. The
+timer retains the last axes/buttons and can keep republishing them after Joy
+input stops; the driver’s watchdog may therefore continue receiving fresh
+commands. Input loss must not be treated as an automatic stop.</p>
+<p>Releasing L1 stops chassis/drone velocity publication, leaving their stop to
+the configured driver deadline; selected gimbal and arm streams receive zeros.
+Target changes do not send an explicit zero to the previous target. Node
+shutdown does not explicitly publish final stop commands. Stopping the node
+ends its stream, but already accepted service actions are not cancelled and
+drones are not automatically landed. These limitations are present in the
+current implementation; the launcher does not provide additional safeguards.</p>
+</section>
+<section id="additional-node-parameters">
+<h3>Additional node parameters<a class="headerlink" href="#additional-node-parameters" title="Link to this heading"></a></h3>
+<p>Parameters not exposed as launch arguments can be set on a directly run node
+with <code class="docutils literal notranslate"><span class="pre">--ros-args</span> <span class="pre">-p</span> <span class="pre">...</span></code> or in a custom launch file. A separate <code class="docutils literal notranslate"><span class="pre">joy_node</span></code>
+must publish <code class="docutils literal notranslate"><span class="pre">/joy</span></code> in that case.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Units / purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">robot_names_csv</span></code> / <code class="docutils literal notranslate"><span class="pre">drone_names_csv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rmep_1</span></code> / <code class="docutils literal notranslate"><span class="pre">rmtt_1</span></code></p></td>
+<td><p>Namespace fallbacks used by the launcher.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">robot</span></code></p></td>
+<td><p>Direct-node default; launcher overrides it to drone.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">publish_rate</span></code> / <code class="docutils literal notranslate"><span class="pre">deadzone</span></code></p></td>
+<td><p>20.0 / 0.1</p></td>
+<td><p>Output Hz and axis deadzone.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">robot_max_linear</span></code> / <code class="docutils literal notranslate"><span class="pre">robot_max_yaw</span></code></p></td>
+<td><p>1.8 / 2.4</p></td>
+<td><p>m/s and rad/s.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">drone_max_linear</span></code> / <code class="docutils literal notranslate"><span class="pre">drone_max_yaw</span></code></p></td>
+<td><p>0.8 / 0.8</p></td>
+<td><p>Normalized RC inputs, not physical velocity units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gimbal_max_speed</span></code></p></td>
+<td><p>180.0</p></td>
+<td><p>Degrees/second.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">arm_max_linear_x</span></code> / <code class="docutils literal notranslate"><span class="pre">arm_max_linear_z</span></code></p></td>
+<td><p>0.18 / 0.18</p></td>
+<td><p>Metres/second; driver applies its increment/velocity bounds.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stream_status_line</span></code> / <code class="docutils literal notranslate"><span class="pre">show_control_legend</span></code></p></td>
+<td><p>true / true</p></td>
+<td><p>Terminal status and controller help.</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">takeoff_height</span></code> and <code class="docutils literal notranslate"><span class="pre">require_deadman</span></code> have the same defaults as the
+launcher. <code class="docutils literal notranslate"><span class="pre">robot_names</span></code> and <code class="docutils literal notranslate"><span class="pre">drone_names</span></code> array parameters also exist, but
+are declared with empty lists rather than explicit string-array types; prefer
+the CSV parameters on Humble instead of assuming typed string-array overrides.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="howto.html" class="btn btn-neutral float-left" title="Using the hardware driver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorials.html" class="btn btn-neutral float-right" title="Command-line and trajectory examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 Aarsh Thakker (CentraleSupélec), and contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

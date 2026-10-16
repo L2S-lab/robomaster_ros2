@@ -1,28 +1,34 @@
 .. _introduction:
 
-ROS 2 driver for DJI RoboMaster series drones and robots
-========================================================
+ROS 2 driver for DJI RoboMaster drones and robots
+=================================================
 
-robomaster_ros2 is a **work-in-progress** port of original `RoboMaster-SDK <https://github.com/dji-sdk/RoboMaster-SDK>`_ to ROS 2.
-It is fully open-source and will be available on `github <https://github.com/L2S-lab/robomaster_ros2>`_. 
+This repository provides ROS 2 Humble hardware drivers for RoboMaster Tello
+Talent (RMTT) drones and EP/Core/S1 robots. Each device has its own namespace,
+with a server for discovery, configuration and fleet services.
 
-It is primarily made for research purposes. The package allows the operation of a team of RoboMaster Tello Talent (RMTT) drones and/or RoboMaster EP Core (RMEP) robots over the local wi-fi network. It opens up the possibilities of a heterogeneous network of robots and drones.
+The hardware camera path publishes raw ``sensor_msgs/msg/Image`` messages
+directly. EP Core arm/gripper services, chassis telemetry, armor events,
+fleet diagnostics and joystick examples are included. Model support and enabled
+sensors determine which ROS endpoints exist.
 
-.. warning::
-  robomaster_ros2 is already usable for most tasks, however configuration file formats might still change. While many features of original SDK are ported, there are currently still some limitations.
-  
-  - Tested only for small team sizes (less than 7 drones and 2 robots)
-
+These pages describe the current local implementation. Example addresses,
+camera settings and fleet sizes are illustrative; use the configuration files
+in your checkout for the selected values. Known gaps in arm streaming, joystick
+stop behavior and fleet telemetry monitoring are documented alongside those
+features.
 
 Contents
 --------
 
 .. toctree::
+   :maxdepth: 1
+
    installation
    overview
    configuration
    howto
-   simulation
+   fleet_tools
    tutorials
    faq
-   :maxdepth: 1
+   simulation

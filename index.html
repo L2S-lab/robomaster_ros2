@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ROS 2 driver for DJI RoboMaster series drones and robots &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
+  <title>ROS 2 driver for DJI RoboMaster drones and robots &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=036e6a88"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -43,12 +43,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Packages and ROS API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">Using the hardware driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fleet_tools.html">Fleet diagnostics and joystick control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Command-line and trajectory examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting and current limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 
         </div>
@@ -65,7 +66,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ROS 2 driver for DJI RoboMaster series drones and robots</li>
+      <li class="breadcrumb-item active">ROS 2 driver for DJI RoboMaster drones and robots</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -75,29 +76,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ros-2-driver-for-dji-robomaster-series-drones-and-robots">
-<span id="introduction"></span><h1>ROS 2 driver for DJI RoboMaster series drones and robots<a class="headerlink" href="#ros-2-driver-for-dji-robomaster-series-drones-and-robots" title="Link to this heading"></a></h1>
-<p>robomaster_ros2 is a <strong>work-in-progress</strong> port of original <a class="reference external" href="https://github.com/dji-sdk/RoboMaster-SDK">RoboMaster-SDK</a> to ROS 2.
-It is fully open-source and will be available on <a class="reference external" href="https://github.com/L2S-lab/robomaster_ros2">github</a>.</p>
-<p>It is primarily made for research purposes. The package allows the operation of a team of RoboMaster Tello Talent (RMTT) drones and/or RoboMaster EP Core (RMEP) robots over the local wi-fi network. It opens up the possibilities of a heterogeneous network of robots and drones.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>robomaster_ros2 is already usable for most tasks, however configuration file formats might still change. While many features of original SDK are ported, there are currently still some limitations.</p>
-<ul class="simple">
-<li><p>Tested only for small team sizes (less than 7 drones and 2 robots)</p></li>
-</ul>
-</div>
+  <section id="ros-2-driver-for-dji-robomaster-drones-and-robots">
+<span id="introduction"></span><h1>ROS 2 driver for DJI RoboMaster drones and robots<a class="headerlink" href="#ros-2-driver-for-dji-robomaster-drones-and-robots" title="Link to this heading"></a></h1>
+<p>This repository provides ROS 2 Humble hardware drivers for RoboMaster Tello
+Talent (RMTT) drones and EP/Core/S1 robots. Each device has its own namespace,
+with a server for discovery, configuration and fleet services.</p>
+<p>The hardware camera path publishes raw <code class="docutils literal notranslate"><span class="pre">sensor_msgs/msg/Image</span></code> messages
+directly. EP Core arm/gripper services, chassis telemetry, armor events,
+fleet diagnostics and joystick examples are included. Model support and enabled
+sensors determine which ROS endpoints exist.</p>
+<p>These pages describe the current local implementation. Example addresses,
+camera settings and fleet sizes are illustrative; use the configuration files
+in your checkout for the selected values. Known gaps in arm streaming, joystick
+stop behavior and fleet telemetry monitoring are documented alongside those
+features.</p>
 <section id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Packages and ROS API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">Using the hardware driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fleet_tools.html">Fleet diagnostics and joystick control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Command-line and trajectory examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting and current limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 </div>
 </section>

@@ -8,19 +8,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration &mdash; RoboMaster ROS 2 1.0a1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=036e6a88"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="How To" href="howto.html" />
-    <link rel="prev" title="Overview" href="overview.html" /> 
+    <link rel="next" title="Using the hardware driver" href="howto.html" />
+    <link rel="prev" title="Packages and ROS API" href="overview.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,20 +44,19 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Packages and ROS API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#robomaster-server-yaml">robomaster_server.yaml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rmtt-param-yaml">rmtt_param.yaml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rmep-param-yaml">rmep_param.yaml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setup-wifi-yaml">setup_wifi.yaml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#custom-char-yaml">custom_char.yaml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#retrieve-robot-info-yaml">retrieve_robot_info.yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#server-and-launch-selection">Server and launch selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#device-parameter-files">Device parameter files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motion-gate">Motion gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-configuration-files">Other configuration files</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">Using the hardware driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fleet_tools.html">Fleet diagnostics and joystick control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Command-line and trajectory examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting and current limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 </ul>
 
         </div>
@@ -86,186 +85,153 @@
              
   <section id="configuration">
 <span id="id1"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
-<p>All configuration files are located in the <cite>robomaster_ros2/config_ros</cite> directory.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Configuration files are subject to minor changes, please check the latest version in the repository.</p>
-</div>
-<ul class="simple">
-<li><p><cite>robomaster_server.yaml</cite>: Setting up the server node and parameters that are changed often.</p></li>
-<li><p><cite>rmtt_param.yaml</cite>: Configuration for the RoboMaster Tello Talent (RMTT) drones.</p></li>
-<li><p><cite>rmep_param.yaml</cite>: Configuration for the RoboMaster EP Core (RMEP) robots.</p></li>
-<li><p><cite>setup_wifi.yaml</cite>: Configuration for the Wi-Fi connection of the RMTT drones and RMEP robots.</p></li>
-<li><p><cite>custom_char.yaml</cite>: Custom characters for the RMTT drones external module LED matrix.</p></li>
-<li><p><cite>retrieve_robot_info.yaml</cite>: Configuration for the retrieval of information of connected robots and drones.</p></li>
-</ul>
-<section id="robomaster-server-yaml">
-<h2>robomaster_server.yaml<a class="headerlink" href="#robomaster-server-yaml" title="Link to this heading"></a></h2>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">local_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.106&quot;</span><span class="w">      </span><span class="c1"># local ip of the network on which drones are connected</span>
-<span class="nt">num_of_drones</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">               </span><span class="c1"># number of drones to be used</span>
-<span class="nt">num_of_eps1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">                 </span><span class="c1"># number of EP or S1 Robots to be used</span>
-<span class="nt">random_assign</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">            </span><span class="c1"># whether to assign drones and robot numbers randomly (Ascending order of IPs last octet)</span>
+<p>Configuration files live in <code class="docutils literal notranslate"><span class="pre">robomaster_ros2/config_ros</span></code>. Values below are
+examples, not a replacement for the files in the local checkout. Camera flags,
+network addresses, command deadlines and fleet size can differ between setups.</p>
+<section id="server-and-launch-selection">
+<h2>Server and launch selection<a class="headerlink" href="#server-and-launch-selection" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">robomaster_server.yaml</span></code> configures the server node:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">robomaster_server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ros__parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">local_ip</span><span class="p">:</span><span class="w"> </span><span class="s">"192.168.0.101"</span>
+<span class="w">    </span><span class="nt">num_of_drones</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">num_of_eps1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">random_assign</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">keyboard_cmd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">local_ip</span></code> must be the PC’s address on the robots’ LAN. <code class="docutils literal notranslate"><span class="pre">random_assign</span></code>
+enables discovery and assigns the discovered IP addresses in sorted order;
+false uses the per-device configured addresses. Requested counts must fit the
+name lists and have matching per-device entries.</p>
+<p>The server launch arguments are <code class="docutils literal notranslate"><span class="pre">num_of_drones</span></code>, <code class="docutils literal notranslate"><span class="pre">num_of_eps1</span></code>, <code class="docutils literal notranslate"><span class="pre">local_ip</span></code>,
+<code class="docutils literal notranslate"><span class="pre">random_assign</span></code> and <code class="docutils literal notranslate"><span class="pre">keyboard_cmd</span></code>. If both count arguments are zero, the
+launcher loads the server YAML file. If either count is non-zero, it constructs
+the server parameters from launch arguments instead. In that case, supply the
+intended LAN address and both counts explicitly. To disable keyboard shortcuts
+in the YAML-driven path, set <code class="docutils literal notranslate"><span class="pre">keyboard_cmd:</span> <span class="pre">false</span></code> in the file itself.</p>
 </section>
-<section id="rmtt-param-yaml">
-<h2>rmtt_param.yaml<a class="headerlink" href="#rmtt-param-yaml" title="Link to this heading"></a></h2>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rmtt</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">mled_display_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">         </span><span class="c1"># whether to display the number of the drone on the mled  on initalisation</span>
-<span class="w">    </span><span class="nt">external_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">       </span><span class="c1"># (WIP) whether to use external positioning system such as mocap</span>
-<span class="w">    </span><span class="nt">drone_name_list</span><span class="p">:</span><span class="w">               </span><span class="c1"># list of names of all the drones that you want to add now or in future (mandatory)</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmtt_1</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmtt_2</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmtt_3</span>
-
-<span class="w">    </span><span class="nt">pub_front_tof</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">           </span><span class="c1"># (Too heavy on process, avoid using with multi drones) whether to publish front tof sensor data</span>
-<span class="w">    </span><span class="nt">pub_bottom_tof</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">           </span><span class="c1"># whether to publish bottom tof sensor data</span>
-<span class="w">    </span><span class="nt">pub_attitude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">             </span><span class="c1"># whether to publish attitude data</span>
-<span class="w">    </span><span class="nt">pub_barometer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">           </span><span class="c1"># (WIP units issue)</span>
-<span class="w">    </span><span class="nt">pub_imu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># (WIP units issue)</span>
-<span class="w">    </span><span class="nt">pub_mpad</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                </span><span class="c1"># Publish info of mission pad below the drone</span>
-
-<span class="w">    </span><span class="c1"># It is advisible to use the random_assign option in robomaster_server.yaml</span>
-
-<span class="w">    </span><span class="c1">#####MANDATORY#####</span>
-<span class="w">    </span><span class="c1"># Individual drone configurations and parameter control for all the drones</span>
-<span class="w">    </span><span class="c1"># name in the list should be the same as the name in the drone_name_list</span>
-<span class="w">    </span><span class="c1"># topic_type: Pose/ PoseStamped/ Point/ PointStamped</span>
-<span class="w">    </span><span class="nt">rmtt_1</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.151&quot;</span>
-<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">        </span><span class="nt">cam_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">             </span><span class="c1"># 0: forward, 1: down</span>
-<span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
+<section id="device-parameter-files">
+<h2>Device parameter files<a class="headerlink" href="#device-parameter-files" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rmtt_param.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">rmep_param.yaml</span></code> belong to the <code class="docutils literal notranslate"><span class="pre">param_server</span></code> node,
+under <code class="docutils literal notranslate"><span class="pre">ros__parameters.rmtt</span></code> and <code class="docutils literal notranslate"><span class="pre">ros__parameters.rmep</span></code> respectively. For
+example, the structure of an RMTT configuration is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">param_server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ros__parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">rmtt</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">drone_name_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">rmtt_1</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">mled_display_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">external_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_front_tof</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_bottom_tof</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">pub_attitude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">pub_barometer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_imu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_mpad</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">fps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">high</span>
+<span class="w">        </span><span class="nt">bitrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">low</span>
+<span class="w">        </span><span class="nt">publish_fps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20.0</span>
+<span class="w">      </span><span class="nt">safety</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">command_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">        </span><span class="nt">require_arm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">latch_deadman</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">rmtt_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">"192.168.0.151"</span>
+<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">cam_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
 <span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmtt_1/pose</span>
-
-<span class="w">    </span><span class="nt">rmtt_2</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.152&quot;</span>
-<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">        </span><span class="nt">cam_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">             </span><span class="c1"># 0: forward, 1: down</span>
-<span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
-<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
-<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmtt_2/pose</span>
-
-<span class="w">    </span><span class="nt">rmtt_3</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.153&quot;</span>
-<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">        </span><span class="nt">cam_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w">             </span><span class="c1"># 0: forward, 1: down</span>
-<span class="w">        </span><span class="nt">yaw_hold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
-<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
-<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmtt_3/pose</span>
 </pre></div>
 </div>
-</section>
-<section id="rmep-param-yaml">
-<h2>rmep_param.yaml<a class="headerlink" href="#rmep-param-yaml" title="Link to this heading"></a></h2>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rmep</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">led_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># whether to display specific led pattern for specific number (R1,R2,R3,R4,G1,G2,G3,G4,B1,B2,B3,B4) etc for 1 to 12</span>
-<span class="w">    </span><span class="nt">external_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">       </span><span class="c1"># (WIP) whether to use external positioning system such as mocap</span>
-<span class="w">    </span><span class="nt">robot_name_list</span><span class="p">:</span><span class="w">               </span><span class="c1"># list of names of the robots (mandatory)</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmep_1</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmep_2</span>
-
-<span class="w">    </span><span class="c1"># WIP (Work in Progress) not working now</span>
-<span class="w">    </span><span class="nt">pub_imu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># (WIP units issue)</span>
-<span class="w">    </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">                 </span><span class="c1"># (WIP units issue)</span>
-<span class="w">    </span><span class="nt">pub_marker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">              </span><span class="c1"># WIP</span>
-<span class="w">    </span><span class="nt">pub_armpose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">              </span><span class="c1"># Publish arm pose of the robot</span>
-
-<span class="c1"># Individual robot configurations and parameter control</span>
-<span class="c1"># name in the list should be the same as the name in the robot_name_list</span>
-<span class="c1"># mandatory while usuing external position</span>
-<span class="c1"># topic_type: Pose/ PoseStamped/ Point/ PointStamped</span>
-<span class="w">    </span><span class="nt">rmep_1</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.161&quot;</span>
-<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># WIP</span>
+<p>RMTT camera FPS accepts <code class="docutils literal notranslate"><span class="pre">high</span></code>, <code class="docutils literal notranslate"><span class="pre">middle</span></code> or <code class="docutils literal notranslate"><span class="pre">low</span></code>. Bitrate is <code class="docutils literal notranslate"><span class="pre">0</span></code> for
+automatic selection or an SDK bitrate setting from 1 to 5. Resolution is
+<code class="docutils literal notranslate"><span class="pre">low</span></code> or <code class="docutils literal notranslate"><span class="pre">high</span></code>. <code class="docutils literal notranslate"><span class="pre">publish_fps</span></code> caps ROS publication frequency; it does not
+guarantee the same capture or delivery rate. <code class="docutils literal notranslate"><span class="pre">cam_direction</span></code> selects forward
+(0) or downward (1) video per drone. Front ToF polling can slow communication;
+barometer/IMU units and <code class="docutils literal notranslate"><span class="pre">yaw_hold</span></code> remain incomplete areas.</p>
+<p>External pose input is enabled with <code class="docutils literal notranslate"><span class="pre">external_position</span></code>. Each device selects
+its input topic and one of <code class="docutils literal notranslate"><span class="pre">Pose</span></code>, <code class="docutils literal notranslate"><span class="pre">PoseStamped</span></code>, <code class="docutils literal notranslate"><span class="pre">Point</span></code> or
+<code class="docutils literal notranslate"><span class="pre">PointStamped</span></code>. These are subscriptions, not an automatically provided
+positioning system. The drone <code class="docutils literal notranslate"><span class="pre">move</span></code> and <code class="docutils literal notranslate"><span class="pre">goto</span></code> callbacks remain
+unimplemented even when their services appear.</p>
+<p>EP/Core/S1 settings use the following structure:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">param_server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ros__parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">rmep</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">robot_name_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">rmep_1</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">led_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">external_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_imu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_marker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">pub_armpose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">pub_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">pub_gimbal_angle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">540p</span>
+<span class="w">        </span><span class="nt">publish_fps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20.0</span>
+<span class="w">      </span><span class="nt">armor</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">gripper</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">control_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">timed</span>
+<span class="w">        </span><span class="nt">power</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">        </span><span class="nt">full_travel_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.25</span>
+<span class="w">        </span><span class="nt">feedback_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.0</span>
+<span class="w">      </span><span class="nt">arm</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">completion_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0</span>
+<span class="w">      </span><span class="nt">safety</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">command_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">        </span><span class="nt">require_arm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">latch_deadman</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">rmep_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">"192.168.0.161"</span>
+<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
 <span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmep_1/pose</span>
-
-<span class="w">    </span><span class="nt">rmep_2</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.0.162&quot;</span>
-<span class="w">        </span><span class="nt">pub_cam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># WIP</span>
-<span class="w">        </span><span class="nt">ext_pose_topic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PoseStamped</span>
-<span class="w">        </span><span class="nt">ext_pose_topic_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/rmep_2/pose</span>
 </pre></div>
 </div>
+<p>The global EP <code class="docutils literal notranslate"><span class="pre">pub_cam</span></code> flag enables cameras for all configured robots. A
+per-robot true flag can enable a camera when the global flag is false; a
+per-robot false flag does not disable a globally enabled camera. Supported
+camera resolutions are <code class="docutils literal notranslate"><span class="pre">360p</span></code>, <code class="docutils literal notranslate"><span class="pre">540p</span></code> and <code class="docutils literal notranslate"><span class="pre">720p</span></code>. Gimbal endpoints require
+a model with a gimbal; arm/gripper endpoints require the EP Core manipulator.</p>
 </section>
-<section id="setup-wifi-yaml">
-<h2>setup_wifi.yaml<a class="headerlink" href="#setup-wifi-yaml" title="Link to this heading"></a></h2>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ssid of the router that all robots will connect to</span>
-<span class="nt">SSID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TP-link_1234&quot;</span>
-
-<span class="c1"># password of the router that you want to connect</span>
-<span class="c1"># can be &quot;-1&quot; to retrive the password from the saved network</span>
-<span class="c1"># OR &quot;None&quot; if there is no password</span>
-<span class="nt">PSK</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-1&quot;</span>
-
-<span class="c1"># use only provided numbers in form of the list to modify the details</span>
-<span class="c1"># [0] if you don&#39;t use drones</span>
-<span class="nt">UPDATE</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">3</span><span class="p p-Indicator">]</span>
-
-<span class="c1"># For EP/S1 robots, you have to connect manually scanning a QR code.</span>
-<span class="c1"># It will dispaly the QR code at end and save the image in the base directory</span>
-<span class="nt">EP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-
-<span class="nt">drone_list</span><span class="p">:</span>
-<span class="w">    </span><span class="c1">#pwd: password of all the tello if they are the same,</span>
-<span class="w">    </span><span class="c1"># use n#&gt;pwd if there is different passwords or &quot;None&quot; if there is no password</span>
-<span class="w">    </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
-<span class="c1"># n+number:</span>
-<span class="c1">#   ssid: ssid of the tello hotspot</span>
-<span class="c1">#   pwd: password associated with the above ssid (&#39;&#39; for no password)</span>
-<span class="w">    </span><span class="nt">n1</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ssid</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RMTT-1&quot;</span>
-<span class="w">        </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
-
-<span class="w">    </span><span class="nt">n2</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ssid</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RMTT-2&quot;</span>
-<span class="w">        </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
-
-<span class="w">    </span><span class="nt">n3</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">ssid</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RMTT-3&quot;</span>
-<span class="w">        </span><span class="nt">pwd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345678&quot;</span>
-</pre></div>
-</div>
+<section id="motion-gate">
+<h2>Motion gate<a class="headerlink" href="#motion-gate" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">safety</span></code> settings apply to RMTT flight velocity and ground chassis/gimbal
+velocity paths:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">command_timeout</span></code>: seconds until a non-zero command expires; 0.0 disables
+expiry. Read the selected device file for its configured value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">require_arm</span></code>: true starts the gate disarmed; use <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/set_armed</span></code>
+(<code class="docutils literal notranslate"><span class="pre">std_srvs/srv/SetBool</span></code>) before gated motion.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">latch_deadman</span></code>: true requires explicit rearming after an expiry.</p></li>
+</ul>
+<p>Landing, hover and emergency operations remain available for stopping a drone.
+The arm velocity stream is separate: in this implementation it does not consult
+the motion gate. Its 20 Hz rate, 0.25-second ROS-clock timeout, +/-0.20 m/s
+velocity clamps and +/-0.03 m increment bounds are constructor defaults, not
+parameters loaded from these YAML files. <code class="docutils literal notranslate"><span class="pre">arm.completion_timeout</span></code> controls
+tracked service waits only. See <a class="reference internal" href="howto.html#howtos"><span class="std std-ref">Using the hardware driver</span></a> for the current stream limitations.</p>
 </section>
-<section id="custom-char-yaml">
-<h2>custom_char.yaml<a class="headerlink" href="#custom-char-yaml" title="Link to this heading"></a></h2>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># You can put your custom characters here with the following format.</span>
-<span class="c1"># Replace bits with the color you want to put at that pixel</span>
-<span class="c1"># 0: off, r: red, b: blue, p:purple</span>
-<span class="c1"># smile:</span>
-<span class="c1"># 0 0 ∎ ∎ ∎ ∎ 0 0</span>
-<span class="c1"># 0 ∎ 0 0 0 0 ∎ 0</span>
-<span class="c1"># ∎ 0 ∎ 0 0 ∎ 0 ∎</span>
-<span class="c1"># ∎ 0 0 0 0 0 0 ∎</span>
-<span class="c1"># ∎ 0 ∎ 0 0 ∎ 0 ∎</span>
-<span class="c1"># ∎ 0 0 ∎ ∎ 0 0 ∎</span>
-<span class="c1"># 0 ∎ 0 0 0 0 ∎ 0</span>
-<span class="c1"># 0 0 ∎ ∎ ∎ ∎ 0 0</span>
-<span class="c1"># For visualisation: https://xantorohara.github.io/led-matrix-editor/</span>
-
-<span class="nt">smile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00&#39;</span>
-<span class="nt">smile2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000000000b0000b0b0b00b0b000000000000000000r00r00000rr00000000000&#39;</span>
-<span class="nt">ok</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000000000000000r000000r000000r00r000r0000r0r000000r0000000000000&#39;</span>
-<span class="nt">star</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000000000rr00rr000rrrr00rrrrrrrr00rrrr000rr00rr00000000000000000&#39;</span>
-<span class="nt">question</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;00rrrr000rr00rr000000rr00000rr00000rr00000000000000rr00000000000&#39;</span>
-<span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0000000000rrrr000rr000r00r0r00r00r00r0r00r000rr000rrrr0000000000&#39;</span>
-<span class="nt">exclamation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;000rr00000rrrr0000rrrr00000rr000000rr00000000000000rr00000000000&#39;</span>
-<span class="nt">double_exclamation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0rr00rr00rr00rr00rr00rr00rr00rr0000000000rr00rr00rr00rr000000000&#39;</span>
-<span class="nt">heart</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0000000000r00r000rrrrrr00rrrrrr00rrrrrr000rrrr00000rr00000000000&#39;</span>
-</pre></div>
-</div>
-</section>
-<section id="retrieve-robot-info-yaml">
-<h2>retrieve_robot_info.yaml<a class="headerlink" href="#retrieve-robot-info-yaml" title="Link to this heading"></a></h2>
-<p>This is not used in the latest version but can be handy, hence it is included here.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># number of drones connected to network (0 if you are not using any)</span>
-<span class="nt">RMTT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="c1"># number of EP/S1 robots connected to network (0 if you are not using any)</span>
-<span class="nt">EP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-</pre></div>
-</div>
+<section id="other-configuration-files">
+<h2>Other configuration files<a class="headerlink" href="#other-configuration-files" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">setup_wifi.yaml</span></code>: the <code class="docutils literal notranslate"><span class="pre">setup_wifi</span></code> node’s LAN SSID/PSK, selected drone
+hotspot entries and EP QR-code setup. <code class="docutils literal notranslate"><span class="pre">PSK:</span> <span class="pre">&quot;-1&quot;</span></code> requests a saved password;
+<code class="docutils literal notranslate"><span class="pre">UPDATE</span></code> selects drone entries and <code class="docutils literal notranslate"><span class="pre">EP</span></code> enables the EP setup step.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">custom_char.yaml</span></code>: 8x8 matrix patterns, encoded as 64 characters using
+<code class="docutils literal notranslate"><span class="pre">0</span></code> (off), <code class="docutils literal notranslate"><span class="pre">r</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">p</span></code>. Used with <code class="docutils literal notranslate"><span class="pre">set_mled</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">retrive_robot_info.yaml</span></code>: device counts for the optional IP/serial-number
+discovery helper. The executable and filename retain the <code class="docutils literal notranslate"><span class="pre">retrive</span></code> spelling.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sn_to_name.yaml</span></code>: device identity/configuration data produced by the
+discovery helper.</p></li>
+</ul>
+<p>Joystick parameters are configured on the teleop node, not in these server
+files; see <a class="reference internal" href="fleet_tools.html#fleet-tools"><span class="std std-ref">Fleet diagnostics and joystick control</span></a>.</p>
 </section>
 </section>
 
@@ -273,8 +239,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="howto.html" class="btn btn-neutral float-right" title="How To" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="overview.html" class="btn btn-neutral float-left" title="Packages and ROS API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="howto.html" class="btn btn-neutral float-right" title="Using the hardware driver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
