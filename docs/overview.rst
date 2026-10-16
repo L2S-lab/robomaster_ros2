@@ -1,196 +1,192 @@
 .. _overview:
 
-Overview
-========
+Packages and ROS API
+====================
 
-This page explain the overview of the RoboMaster ROS 2 packages:
+``robomaster_ros2`` contains the hardware server, parameter server, network
+helpers and device drivers. ``robomaster_interface`` defines their custom
+messages and services. ``robomaster_examples`` supplies waypoint/trajectory
+examples, fleet diagnostics and joystick control. Simulation is documented
+separately in :ref:`simulation`.
 
-Explanation of packages
------------------------
+Namespaces and availability
+---------------------------
 
-Source code is divided into several packages, each with its own purpose:
+The server uses root fleet services. Each device node is created in its own
+namespace: a device named ``rmtt_1`` has node name ``/rmtt_1/rmtt_1`` and topics
+such as ``/rmtt_1/image``. Replace ``<name>`` below with the configured name.
+Sensor flags and detected model capabilities control endpoint creation; not
+every robot provides every endpoint.
 
-- **robomaster_interface**: This package provides the interface for controlling the RoboMaster robots and drones.
-- **robomaster_ros2**: This package contains the main implementation of the RoboMaster ROS 2 node.
-- **robomaster_examples**: This package includes example scripts using the RoboMaster ROS 2 node.
+Server services
+---------------
 
-Interfaces
-----------
+.. list-table::
+   :header-rows: 1
 
-The `robomaster_interface` package provides the interface for controlling the RoboMaster robots and drones. It includes the necessary messages, services, and actions for communication between the ROS 2 nodes and the RoboMaster devices.
+   * - Endpoint
+     - Service type
+     - Behavior
+   * - ``/add_drone``
+     - AddDrone
+     - Register an RMTT with address, camera and optional external-pose settings.
+   * - ``/remove_robot``
+     - RemoveRobot
+     - Remove an RMTT by name and type ``rmtt``.
+   * - ``/add_robot``
+     - AddRobot
+     - Advertised, but the current handler is unimplemented.
+   * - ``/takeoff_all`` / ``/land_all``
+     - Trigger
+     - Created only while at least one drone is registered.
 
-+---------------------+----------+-------------------------------------------------------------------+
-| **Name**            | **Type** | **Description**                                                   |
-+=====================+==========+===================================================================+
-| GimbalAngle         | Message  | Message description for the gimbal angle of the robot.            |
-+---------------------+----------+-------------------------------------------------------------------+
-| GimbalVel           | Message  | Message description for the gimbal velocity of the robot.         |
-+---------------------+----------+-------------------------------------------------------------------+
-| ArmActionStatus     | Message  | Tracked EP Core arm action state, progress, and completion.       |
-+---------------------+----------+-------------------------------------------------------------------+
-| ArmorHit            | Message  | Armor ID/component, water/IR type, and impact strength.           |
-+---------------------+----------+-------------------------------------------------------------------+
-| GripperState        | Message  | Gripper feedback, estimate, mode, busy state, and result.         |
-+---------------------+----------+-------------------------------------------------------------------+
-| IrHit               | Message  | Cumulative IR hit count and DJI receiver metadata.                |
-+---------------------+----------+-------------------------------------------------------------------+
-| TelloMpad           | Message  | Message description for the Tello mission pad recognition.        |
-+---------------------+----------+-------------------------------------------------------------------+
-| AddDrone            | Service  | Service to add a drone to the system.                             |
-+---------------------+----------+-------------------------------------------------------------------+
-| AddRobot            | Service  | Declared service; runtime handler is currently not implemented.   |
-+---------------------+----------+-------------------------------------------------------------------+
-| RemoveRobot         | Service  | Service to remove a drone by name/type (rmtt currently supported).|
-+---------------------+----------+-------------------------------------------------------------------+
-| Takeoff             | Service  | Service to command the drone to take off.                         |
-+---------------------+----------+-------------------------------------------------------------------+
-| SetSpeed            | Service  | Service to set the speed of the drone.                            |
-+---------------------+----------+-------------------------------------------------------------------+
-| TelloLED            | Service  | Service to control the LED of the Tello external module.          |
-+---------------------+----------+-------------------------------------------------------------------+
-| TelloMled           | Service  | Service to control the 8x8 matrix LED of the Tello external module|
-+---------------------+----------+-------------------------------------------------------------------+
-| MoveChassis         | Service  | Service to move the chassis of the robot.                         |
-+---------------------+----------+-------------------------------------------------------------------+
-| MoveArm             | Service  | Service to move the arm of the robot.                             |
-+---------------------+----------+-------------------------------------------------------------------+
-| MoveGimbal          | Service  | Service to move the gimbal of the robot.                          |
-+---------------------+----------+-------------------------------------------------------------------+
-| Gripper             | Service  | Service to open or close the gripper of the robot.                |
-+---------------------+----------+-------------------------------------------------------------------+
-| GripperCommand      | Service  | Open, close, pause, or endpoint-reset an EP Core gripper.         |
-+---------------------+----------+-------------------------------------------------------------------+
-| SetGripperMode      | Service  | Select timed or endpoint-feedback gripper control.                |
-+---------------------+----------+-------------------------------------------------------------------+
-| SetArmorSensitivity | Service  | Configure DJI hit sensitivity for selected armor components.      |
-+---------------------+----------+-------------------------------------------------------------------+
-| RobotLED            | Service  | Service to control the LED modules of the robot.                  |
-+---------------------+----------+-------------------------------------------------------------------+
-| GimbalLED           | Service  | Service to select and control individual gimbal armor LEDs.       |
-+---------------------+----------+-------------------------------------------------------------------+
-| BlasterLED          | Service  | Service to control the gimbal blaster LED.                        |
-+---------------------+----------+-------------------------------------------------------------------+
-| Fire                | Service  | Service to fire IR/gel-beans using the robots gimbal.             |
-+---------------------+----------+-------------------------------------------------------------------+
+Custom service names refer to ``robomaster_interface/srv``. ``Trigger``,
+``Empty`` and ``SetBool`` refer to ``std_srvs/srv``.
 
+Drone services
+--------------
 
-RoboMaster ROS 2
+.. list-table::
+   :header-rows: 1
+
+   * - Relative endpoint
+     - Type
+     - Behavior
+   * - ``get_sn``, ``get_battery``, ``status``
+     - Trigger
+     - Serial number, battery percentage and flight state.
+   * - ``set_speed``
+     - SetSpeed
+     - Set SDK movement speed; this does not change the normalized cmd_vel interface.
+   * - ``takeoff``
+     - Takeoff
+     - Height in metres and a sync flag.
+   * - ``land``, ``soft_emergency``
+     - Trigger
+     - Landing or emergency landing.
+   * - ``hover``, ``emergency``, ``reboot``
+     - Empty
+     - Stop RC commands, stop motors, or reboot.
+   * - ``set_armed``
+     - SetBool
+     - Control the flight motion gate.
+   * - ``set_led``, ``set_mled``
+     - TelloLED / TelloMled
+     - External-module RGB and matrix LEDs.
+   * - ``move``, ``goto``
+     - Move / GoTo
+     - May be advertised with external positioning, but callbacks are unimplemented.
+
+Ground robot services
+---------------------
+
+.. list-table::
+   :header-rows: 1
+
+   * - Relative endpoint
+     - Type
+     - Availability / behavior
+   * - ``get_sn``, ``get_battery``
+     - Trigger
+     - EP/Core/S1 identity and DDS-cached battery percentage.
+   * - ``set_armed``
+     - SetBool
+     - Control chassis/gimbal motion gate; does not guard the current arm stream.
+   * - ``move_chassis``
+     - MoveChassis
+     - Tracked chassis movement.
+   * - ``close_robot``
+     - Empty
+     - Close the device connection.
+   * - ``led_chassis``
+     - RobotLED
+     - Chassis armor LEDs.
+   * - ``set_armor_sensitivity``
+     - SetArmorSensitivity
+     - Available when armor support is enabled.
+   * - ``move_gimbal``, ``reset_gimbal``
+     - MoveGimbal / Trigger
+     - Models with a gimbal.
+   * - ``led_gimbal``, ``led_blaster``, ``fire``
+     - GimbalLED / BlasterLED / Fire
+     - Models with a gimbal/blaster.
+   * - ``move_arm``, ``move_arm_to``
+     - MoveArm
+     - EP Core relative/absolute arm actions with optional completion wait.
+   * - ``recenter_arm``, ``reset_arm``, ``cancel_arm``
+     - Trigger
+     - EP Core tracked-action lifecycle.
+   * - ``gripper``
+     - Gripper
+     - EP Core percentage command, accepted asynchronously.
+   * - ``gripper_command``, ``set_gripper_mode``
+     - GripperCommand / SetGripperMode
+     - EP Core named operations and timed/feedback control.
+
+Topics and units
 ----------------
 
-The `robomaster_ros2` package is the main implementation of the RoboMaster server as well as several helper nodes. It provides the core functionality for controlling the RoboMaster robots and drones, including communication with the devices, handling of messages, and execution of commands.
+The endpoint is ``/<name>/<topic>`` unless stated otherwise. Standard message
+names below come from ``geometry_msgs/msg`` or ``sensor_msgs/msg``; named
+RoboMaster messages come from ``robomaster_interface/msg``.
 
-.. image:: images/connection.png
-    :align: center
-    :alt: Connection overview
+.. list-table::
+   :header-rows: 1
 
-robomaster server
-^^^^^^^^^^^^^^^^^
+   * - Device / topic
+     - Message
+     - Direction / semantics
+   * - Both: ``image``
+     - sensor_msgs/Image
+     - Published raw bgr8 frames; best-effort, volatile, depth 1.
+   * - Drone: ``cmd_vel``
+     - Twist
+     - Subscribed normalized RC inputs in [-1, 1]; not m/s or rad/s.
+   * - Drone: ``front_tof``, ``bottom_tof``
+     - Range
+     - Enabled distance sensors.
+   * - Drone: ``attitude``
+     - QuaternionStamped
+     - Enabled attitude telemetry.
+   * - Drone: ``baro``, ``imu``, ``mpad``
+     - FluidPressure / Imu / TelloMpad
+     - Optional telemetry; barometer/IMU unit handling remains incomplete.
+   * - Drone: ``rmtt_server/pose``
+     - Pose
+     - Republished external-pose input when enabled.
+   * - Ground: ``cmd_vel``
+     - Twist
+     - Subscribed chassis translation in m/s and yaw in rad/s.
+   * - Ground: ``position``
+     - PoseStamped
+     - DDS position with quaternion orientation from chassis attitude.
+   * - Gimbal: ``gimbal_cmd_vel``
+     - GimbalVel
+     - Subscribed pitch/yaw speed in degrees/second.
+   * - Gimbal: ``gimbal_angle``
+     - GimbalAngle
+     - Enabled angle feedback.
+   * - EP Core: ``arm_cmd_vel``
+     - Twist
+     - Subscribed X/Z stream velocities in m/s; independent of the motion gate.
+   * - EP Core: ``arm_position``
+     - PointStamped
+     - Enabled legacy arm DDS feedback; service command units must not be inferred from this topic.
+   * - EP Core: ``arm_action_status``
+     - ArmActionStatus
+     - Tracked service action ID, state, progress and completion.
+   * - EP Core: ``gripper_state``
+     - GripperState
+     - Hardware endpoint status plus estimated percentage, mode and operation state.
+   * - Armor: ``armor_hit``, ``ir_hit``
+     - ArmorHit / IrHit
+     - Event topics; silence can be normal.
 
-This is the main node, handles the server type framework for the RoboMaster robots and drones. It is used to configure and manage drones/robots and handles several common services.
+External pose subscriptions use the configured ``ext_pose_topic_name`` and
+``ext_pose_topic_type``. There is no fixed ``external_position`` input topic.
+The real driver does not create a positioning system from these settings.
 
-Topics and services provided by the server and the added robo/drone:
-
-List of services:
-
-+---------------------------+---------------+
-| **Name**                  | **Type**      |
-+===========================+===============+
-| /add_drone                | AddDrone      |
-+---------------------------+---------------+
-| /add_robot                | AddRobot      |
-+---------------------------+---------------+
-| /remove_robot             | RemoveRobot   |
-+---------------------------+---------------+
-| /takeoff_all              | Trigger       |
-+---------------------------+---------------+
-| /land_all                 | Trigger       |
-+---------------------------+---------------+
-| /drone_1/get_sn           | Trigger       |
-+---------------------------+---------------+
-| /drone_1/get_battery      | Trigger       |
-+---------------------------+---------------+
-| /drone_1/set_speed        | SetSpeed      |
-+---------------------------+---------------+
-| /drone_1/takeoff          | Takeoff       |
-+---------------------------+---------------+
-| /drone_1/land             | Trigger       |
-+---------------------------+---------------+
-| /drone_1/hover            | Empty         |
-+---------------------------+---------------+
-| /drone_1/soft_emergency   | Trigger       |
-+---------------------------+---------------+
-| /drone_1/emergency        | Empty         |
-+---------------------------+---------------+
-| /drone_1/set_led          | TelloLED      |
-+---------------------------+---------------+
-| /drone_1/set_mled         | TelloMled     |
-+---------------------------+---------------+
-| /drone_1/status           | Trigger       |
-+---------------------------+---------------+
-| /drone_1/reboot           | Empty         |
-+---------------------------+---------------+
-| /robot_1/get_sn           | Trigger       |
-+---------------------------+---------------+
-| /robot_1/led_chassis      | RobotLED      |
-+---------------------------+---------------+
-| /robot_1/led_gimbal       | GimbalLED     |
-+---------------------------+---------------+
-| /robot_1/led_blaster      | BlasterLED    |
-+---------------------------+---------------+
-| /robot_1/move_gimbal      | MoveGimbal    |
-+---------------------------+---------------+
-| /robot_1/fire             | Fire          |
-+---------------------------+---------------+
-| /robot_1/move_arm         | MoveArm       |
-+---------------------------+---------------+
-| /robot_1/gripper          | Gripper       |
-+---------------------------+---------------+
-
-EP/Core/S1 robots additionally provide ``/<robot>/get_battery`` (Trigger),
-``/<robot>/set_armor_sensitivity`` (SetArmorSensitivity), and armor event
-topics. EP Core robots additionally provide ``move_arm_to``, ``recenter_arm``,
-``reset_arm``, ``cancel_arm``, ``gripper_command``, and ``set_gripper_mode``.
-
-List of topics (published/subscribed):
-
-+------------------------------+-------------------+
-| **Name**                     | **Type**          |
-+==============================+===================+
-| /drone_1/rmtt_server/pose    | Pose              |
-+------------------------------+-------------------+
-| /drone_1/front_tof           | Range             |
-+------------------------------+-------------------+
-| /drone_1/bottom_tof          | Range             |
-+------------------------------+-------------------+
-| /drone_1/imu                 | Imu               |
-+------------------------------+-------------------+
-| /drone_1/attitude            | QuaternionStamped |
-+------------------------------+-------------------+
-| /drone_1/baro                | FluidPressure     |
-+------------------------------+-------------------+
-| /drone_1/mpad                | TelloMpad         |
-+------------------------------+-------------------+
-| /drone_1/image               | Image             |
-+------------------------------+-------------------+
-| /drone_1/cmd_vel             | Twist             |
-+------------------------------+-------------------+
-| /drone_1/external_position   | PoseStamped       |
-+------------------------------+-------------------+
-| /robot_1/arm_position        | PointStamped      |
-+------------------------------+-------------------+
-| /robot_1/position            | PoseStamped       |
-+------------------------------+-------------------+
-| /robot_1/gimbal_angle        | GimbalAngle       |
-+------------------------------+-------------------+
-| /robot_1/gimbal_cmd_vel      | GimbalVel         |
-+------------------------------+-------------------+
-| /robot_1/armor_hit           | ArmorHit          |
-+------------------------------+-------------------+
-| /robot_1/ir_hit              | IrHit             |
-+------------------------------+-------------------+
-| /robot_1/gripper_state       | GripperState      |
-+------------------------------+-------------------+
-| /robot_1/arm_action_status   | ArmActionStatus   |
-+------------------------------+-------------------+
-| /robot_1/cmd_vel             | Twist             |
-+------------------------------+-------------------+
+Camera publication is direct; the driver creates no compressed image topic or
+camera bridge. Most other topics use reliable QoS. Arm velocity uses depth 20
+and gimbal velocity depth 60. See :ref:`howtos` for lifecycle/units and
+:ref:`fleet_tools` for current example limitations.

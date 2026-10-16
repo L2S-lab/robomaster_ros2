@@ -3,214 +3,163 @@
 Configuration
 =============
 
-All configuration files are located in the `robomaster_ros2/config_ros` directory.
+Configuration files live in ``robomaster_ros2/config_ros``. Values below are
+examples, not a replacement for the files in the local checkout. Camera flags,
+network addresses, command deadlines and fleet size can differ between setups.
 
-.. note::
-   Configuration files are subject to minor changes, please check the latest version in the repository.
+Server and launch selection
+---------------------------
 
-* `robomaster_server.yaml`: Setting up the server node and parameters that are changed often.
-* `rmtt_param.yaml`: Configuration for the RoboMaster Tello Talent (RMTT) drones.
-* `rmep_param.yaml`: Configuration for the RoboMaster EP Core (RMEP) robots.
-* `setup_wifi.yaml`: Configuration for the Wi-Fi connection of the RMTT drones and RMEP robots.
-* `custom_char.yaml`: Custom characters for the RMTT drones external module LED matrix.
-* `retrive_robot_info.yaml`: Configuration for the retrieval of information of connected robots and drones.
-
-robomaster_server.yaml
-~~~~~~~~~~~~~~~~~~~~~~
+``robomaster_server.yaml`` configures the server node:
 
 .. code-block:: yaml
 
-    local_ip: "192.168.0.106"      # local ip of the network on which drones are connected
-    num_of_drones: 0               # number of drones to be used
-    num_of_eps1: 0                 # number of EP or S1 Robots to be used
-    random_assign: True            # whether to assign drones and robot numbers randomly (Ascending order of IPs last octet)
+   robomaster_server:
+     ros__parameters:
+       local_ip: "192.168.0.101"
+       num_of_drones: 1
+       num_of_eps1: 1
+       random_assign: true
+       keyboard_cmd: false
 
+``local_ip`` must be the PC's address on the robots' LAN. ``random_assign``
+enables discovery and assigns the discovered IP addresses in sorted order;
+false uses the per-device configured addresses. Requested counts must fit the
+name lists and have matching per-device entries.
 
-rmtt_param.yaml
-~~~~~~~~~~~~~~~
+The server launch arguments are ``num_of_drones``, ``num_of_eps1``, ``local_ip``,
+``random_assign`` and ``keyboard_cmd``. If both count arguments are zero, the
+launcher loads the server YAML file. If either count is non-zero, it constructs
+the server parameters from launch arguments instead. In that case, supply the
+intended LAN address and both counts explicitly. To disable keyboard shortcuts
+in the YAML-driven path, set ``keyboard_cmd: false`` in the file itself.
 
-.. code-block:: yaml
+Device parameter files
+----------------------
 
-    rmtt:
-        mled_display_num: True         # whether to display the number of the drone on the mled  on initalisation
-        external_position: False       # (WIP) whether to use external positioning system such as mocap
-        drone_name_list:               # list of names of all the drones that you want to add now or in future (mandatory)
-            - rmtt_1   
-            - rmtt_2  
-            - rmtt_3
-
-        pub_front_tof: False           # (Too heavy on process, avoid using with multi drones) whether to publish front tof sensor data
-        pub_bottom_tof: True           # whether to publish bottom tof sensor data
-        pub_attitude: True             # whether to publish attitude data
-        pub_barometer: False           # (WIP units issue) 
-        pub_imu: False                 # (WIP units issue) 
-        pub_mpad: False                # Publish info of mission pad below the drone
-
-        camera:
-            fps: high                  # high, middle, low
-            bitrate: 2                 # 0 (auto) or 1..5 Mbit/s
-            resolution: low            # low (480p) or high (720p)
-            publish_fps: 20.0          # maximum ROS image publication rate
-
-        # It is advisible to use the random_assign option in robomaster_server.yaml
-        
-        #####MANDATORY#####
-        # Individual drone configurations and parameter control for all the drones
-        # name in the list should be the same as the name in the drone_name_list
-        # topic_type: Pose/ PoseStamped/ Point/ PointStamped
-        rmtt_1:
-            ip: "192.168.0.151"
-            pub_cam: False
-            cam_direction: 0             # 0: forward, 1: down
-            yaw_hold: False              # WIP
-            ext_pose_topic_type: PoseStamped
-            ext_pose_topic_name: /rmtt_1/pose
-
-        rmtt_2:
-            ip: "192.168.0.152"
-            pub_cam: False
-            cam_direction: 0             # 0: forward, 1: down
-            yaw_hold: False              # WIP
-            ext_pose_topic_type: PoseStamped
-            ext_pose_topic_name: /rmtt_2/pose
-
-        rmtt_3:
-            ip: "192.168.0.153"
-            pub_cam: False
-            cam_direction: 0             # 0: forward, 1: down
-            yaw_hold: False              # WIP
-            ext_pose_topic_type: PoseStamped
-            ext_pose_topic_name: /rmtt_3/pose
-
-rmep_param.yaml
-~~~~~~~~~~~~~~~
+``rmtt_param.yaml`` and ``rmep_param.yaml`` belong to the ``param_server`` node,
+under ``ros__parameters.rmtt`` and ``ros__parameters.rmep`` respectively. For
+example, the structure of an RMTT configuration is:
 
 .. code-block:: yaml
 
-    rmep:
-        led_num: False                 # whether to display specific led pattern for specific number (R1,R2,R3,R4,G1,G2,G3,G4,B1,B2,B3,B4) etc for 1 to 12
-        external_position: False       # (WIP) whether to use external positioning system such as mocap 
-        robot_name_list:               # list of names of the robots (mandatory)
-            - rmep_1   
-            - rmep_2  
+   param_server:
+     ros__parameters:
+       rmtt:
+         drone_name_list: [rmtt_1]
+         mled_display_num: true
+         external_position: false
+         pub_front_tof: false
+         pub_bottom_tof: true
+         pub_attitude: true
+         pub_barometer: false
+         pub_imu: false
+         pub_mpad: false
+         camera:
+           fps: high
+           bitrate: 2
+           resolution: low
+           publish_fps: 20.0
+         safety:
+           command_timeout: 0.5
+           require_arm: false
+           latch_deadman: false
+         rmtt_1:
+           ip: "192.168.0.151"
+           pub_cam: true
+           cam_direction: 0
+           yaw_hold: false
+           ext_pose_topic_type: PoseStamped
+           ext_pose_topic_name: /rmtt_1/pose
 
-        pub_imu: False                 # (WIP units issue)
-        pub_cam: False                 # default for all EP/Core robots
-        pub_marker: False              # WIP
-        pub_armpose: True              # Publish arm pose of the robot
-        pub_position: False            # Publish chassis x/y and yaw at 10 Hz
-        pub_gimbal_angle: False        # Publish gimbal angles at 10 Hz (EP/S1 only)
+RMTT camera FPS accepts ``high``, ``middle`` or ``low``. Bitrate is ``0`` for
+automatic selection or an SDK bitrate setting from 1 to 5. Resolution is
+``low`` or ``high``. ``publish_fps`` caps ROS publication frequency; it does not
+guarantee the same capture or delivery rate. ``cam_direction`` selects forward
+(0) or downward (1) video per drone. Front ToF polling can slow communication;
+barometer/IMU units and ``yaw_hold`` remain incomplete areas.
 
-        camera:
-            resolution: 540p           # 360p, 540p, or 720p
-            publish_fps: 20.0          # maximum ROS image publication rate
+External pose input is enabled with ``external_position``. Each device selects
+its input topic and one of ``Pose``, ``PoseStamped``, ``Point`` or
+``PointStamped``. These are subscriptions, not an automatically provided
+positioning system. The drone ``move`` and ``goto`` callbacks remain
+unimplemented even when their services appear.
 
-        armor:
-            enabled: True              # publish water/IR hits and sensitivity service
-
-        gripper:
-            control_mode: timed        # timed or feedback (endpoints only)
-            power: 50                  # default open/close power, 1--100
-            full_travel_time: 1.25     # calibrated 0--100% travel time in seconds
-            feedback_timeout: 3.0      # endpoint wait timeout in seconds
-
-        arm:
-            completion_timeout: 10.0   # default completion wait; 0.1--60 seconds
-
-    # Individual robot configurations and parameter control
-    # name in the list should be the same as the name in the robot_name_list
-    # mandatory while usuing external position
-    # topic_type: Pose/ PoseStamped/ Point/ PointStamped
-        rmep_1:
-            ip: "192.168.0.161"
-            pub_cam: False
-            ext_pose_topic_type: PoseStamped
-            ext_pose_topic_name: /rmep_1/pose
-
-        rmep_2:
-            ip: "192.168.0.162"
-            pub_cam: False
-            ext_pose_topic_type: PoseStamped
-            ext_pose_topic_name: /rmep_2/pose
-
-setup_wifi.yaml
-~~~~~~~~~~~~~~~
-
-.. code-block:: yaml
-    
-    # ssid of the router that all robots will connect to
-    SSID: "TP-link_1234"
-
-    # password of the router that you want to connect
-    # can be "-1" to retrive the password from the saved network 
-    # OR "None" if there is no password
-    PSK: "-1"
-
-    # use only provided numbers in form of the list to modify the details
-    # [0] if you don't use drones
-    UPDATE: [1,2,3]
-
-    # For EP/S1 robots, you have to connect manually scanning a QR code. 
-    # It will dispaly the QR code at end and save the image in the base directory 
-    EP: False
-
-    drone_list:
-        #pwd: password of all the tello if they are the same, 
-        # use n#>pwd if there is different passwords or "None" if there is no password
-        pwd: "12345678"
-    # n+number:
-    #   ssid: ssid of the tello hotspot
-    #   pwd: password associated with the above ssid ('' for no password)
-        n1:
-            ssid: "RMTT-1"
-            pwd: "12345678"
-
-        n2:
-            ssid: "RMTT-2"
-            pwd: "12345678"
-
-        n3:
-            ssid: "RMTT-3"
-            pwd: "12345678"
-
-custom_char.yaml
-~~~~~~~~~~~~~~~~
+EP/Core/S1 settings use the following structure:
 
 .. code-block:: yaml
 
-    # You can put your custom characters here with the following format.
-    # Replace bits with the color you want to put at that pixel
-    # 0: off, r: red, b: blue, p:purple
-    # smile:
-    # 0 0 ∎ ∎ ∎ ∎ 0 0
-    # 0 ∎ 0 0 0 0 ∎ 0
-    # ∎ 0 ∎ 0 0 ∎ 0 ∎
-    # ∎ 0 0 0 0 0 0 ∎
-    # ∎ 0 ∎ 0 0 ∎ 0 ∎
-    # ∎ 0 0 ∎ ∎ 0 0 ∎
-    # 0 ∎ 0 0 0 0 ∎ 0
-    # 0 0 ∎ ∎ ∎ ∎ 0 0
-    # For visualisation: https://xantorohara.github.io/led-matrix-editor/
+   param_server:
+     ros__parameters:
+       rmep:
+         robot_name_list: [rmep_1]
+         led_num: false
+         external_position: false
+         pub_imu: false
+         pub_cam: false
+         pub_marker: false
+         pub_armpose: true
+         pub_position: true
+         pub_gimbal_angle: true
+         camera:
+           resolution: 540p
+           publish_fps: 20.0
+         armor:
+           enabled: true
+         gripper:
+           control_mode: timed
+           power: 50
+           full_travel_time: 1.25
+           feedback_timeout: 3.0
+         arm:
+           completion_timeout: 10.0
+         safety:
+           command_timeout: 0.5
+           require_arm: false
+           latch_deadman: false
+         rmep_1:
+           ip: "192.168.0.161"
+           pub_cam: true
+           ext_pose_topic_type: PoseStamped
+           ext_pose_topic_name: /rmep_1/pose
 
-    smile: '00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00'
-    smile2: '000000000b0000b0b0b00b0b000000000000000000r00r00000rr00000000000'
-    ok: '000000000000000r000000r000000r00r000r0000r0r000000r0000000000000'
-    star: '000000000rr00rr000rrrr00rrrrrrrr00rrrr000rr00rr00000000000000000'
-    question: '00rrrr000rr00rr000000rr00000rr00000rr00000000000000rr00000000000'
-    stop: '0000000000rrrr000rr000r00r0r00r00r00r0r00r000rr000rrrr0000000000'
-    exclamation: '000rr00000rrrr0000rrrr00000rr000000rr00000000000000rr00000000000'
-    double_exclamation: '0rr00rr00rr00rr00rr00rr00rr00rr0000000000rr00rr00rr00rr000000000'
-    heart: '0000000000r00r000rrrrrr00rrrrrr00rrrrrr000rrrr00000rr00000000000'
+The global EP ``pub_cam`` flag enables cameras for all configured robots. A
+per-robot true flag can enable a camera when the global flag is false; a
+per-robot false flag does not disable a globally enabled camera. Supported
+camera resolutions are ``360p``, ``540p`` and ``720p``. Gimbal endpoints require
+a model with a gimbal; arm/gripper endpoints require the EP Core manipulator.
 
+Motion gate
+-----------
 
-retrive_robot_info.yaml
-~~~~~~~~~~~~~~~~~~~~~~~~
+The ``safety`` settings apply to RMTT flight velocity and ground chassis/gimbal
+velocity paths:
 
-This is not used in the latest version but can be handy, hence it is included here.
+- ``command_timeout``: seconds until a non-zero command expires; 0.0 disables
+  expiry. Read the selected device file for its configured value.
+- ``require_arm``: true starts the gate disarmed; use ``/<name>/set_armed``
+  (``std_srvs/srv/SetBool``) before gated motion.
+- ``latch_deadman``: true requires explicit rearming after an expiry.
 
-.. code-block:: yaml
+Landing, hover and emergency operations remain available for stopping a drone.
+The arm velocity stream is separate: in this implementation it does not consult
+the motion gate. Its 20 Hz rate, 0.25-second ROS-clock timeout, +/-0.20 m/s
+velocity clamps and +/-0.03 m increment bounds are constructor defaults, not
+parameters loaded from these YAML files. ``arm.completion_timeout`` controls
+tracked service waits only. See :ref:`howtos` for the current stream limitations.
 
-    # number of drones connected to network (0 if you are not using any)
-    RMTT: 1
-    # number of EP/S1 robots connected to network (0 if you are not using any)
-    EP: 0
+Other configuration files
+-------------------------
+
+- ``setup_wifi.yaml``: the ``setup_wifi`` node's LAN SSID/PSK, selected drone
+  hotspot entries and EP QR-code setup. ``PSK: "-1"`` requests a saved password;
+  ``UPDATE`` selects drone entries and ``EP`` enables the EP setup step.
+- ``custom_char.yaml``: 8x8 matrix patterns, encoded as 64 characters using
+  ``0`` (off), ``r``, ``b`` and ``p``. Used with ``set_mled``.
+- ``retrive_robot_info.yaml``: device counts for the optional IP/serial-number
+  discovery helper. The executable and filename retain the ``retrive`` spelling.
+- ``sn_to_name.yaml``: device identity/configuration data produced by the
+  discovery helper.
+
+Joystick parameters are configured on the teleop node, not in these server
+files; see :ref:`fleet_tools`.

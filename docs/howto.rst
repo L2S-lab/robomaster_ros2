@@ -1,208 +1,173 @@
 .. _howtos:
 
-How To
-======
+Using the hardware driver
+=========================
 
-Setup Wi-Fi for RMTT and RMEP
------------------------------
+Network and startup
+-------------------
 
-All the drones and robots are tested with 2.4 GHz Wi-Fi network. 
-It is advisible to assign static IPs to the RMTT drones and RMEP robots using the router settings and label the robots and drones with their IPs for ease of use. 
-If dynamic IP are used, enable `random_assign` option in the `robomaster_server.yaml` file.
+Connect the PC and devices to the same LAN. Configure the PC's LAN address,
+device names, counts and IPs in the files described in :ref:`configuration`.
+For static assignment, give each device a stable address and set
+``random_assign: false``. Discovery assigns found devices in sorted IP order;
+it does not establish permanent identity-to-name mapping.
 
-Use the `setup_wifi.yaml` file to setup the configuration required.
-
-Drones:
-
-Connect the external module to the RMTT drones, switch the connection mode to **direct** (AP mode) connection and power on all the drones.
-
-.. image:: images/ext_module.jpg
-   :align: center
-   :alt: External module 
-
-Robots:
-
-Turn on the robots and switch the connection mode to **router** connection.
-
-.. image:: images/ep-wifi.png
-    :align: center
-    :alt: EP Wi-Fi settings
-
-Once all the drones and robots are powered on, run the following command.
+For initial Wi-Fi setup, edit ``setup_wifi.yaml`` and run the helper. RMTTs
+begin in direct/AP mode for configuration, then must be switched to router/STA
+mode. EP devices use router mode and the generated QR code:
 
 .. code-block:: bash
 
-    source install/setup.bash
-    ros2 launch robomaster_ros2 setup_wifi.launch.py
+   source install/setup.bash
+   ros2 launch robomaster_ros2 setup_wifi.launch.py
 
-This will connect your PC to the RMTT drones one by one and excecute the necessary commands to set up the Wi-Fi connection. 
-
-The QR code will be displayed on seperate window. press the red/white small button on the side of the robot's connection switch and scan it using the robot's camera to connect the robot to the Wi-Fi network.
-
-
-Once the setup is done, drones need turn off and switch to the **router** (STA mode) connection mode.
-Now when the drones are powered on, they will connect to the Wi-Fi network and propeller will start spinning at low speed. This indicates the connection is successful. (It can take couple of minutes)
-
-.. tip:: 
-    You can flip the drone >90° to stop the propellers.
-
-.. note::
-    This setup procedure is generally only required once. If a drone or robot is unable to connect to the network, repeat the setup process for the specific robot/drone.
-
-Start the robomaster server
----------------------------
-
-Once all the drones, robots and PC are connected to the Wi-Fi network, robomaster server can be started.
-
-Check the `rmtt_param.yaml` and `rmep_param.yaml` files to ensure the parameters are set correctly for the drones and robots.
-
-Check the `robomaster_server.yaml` file to ensure the local IP, number of drones and robots are set correctly.
+The optional IP/serial helper uses ``retrive_robot_info.yaml`` and writes
+``sn_to_name.yaml``:
 
 .. code-block:: bash
 
-    source install/setup.bash
-    ros2 launch robomaster_ros2 robomaster_server.launch.py
+   ros2 launch robomaster_ros2 retrive_robot_info.launch.py
 
-Camera feeds
-------------
-
-Set ``pub_cam: True`` in each robot's entry in ``rmtt_param.yaml`` or
-``rmep_param.yaml``. Camera frames are published as ``sensor_msgs/Image`` on
-``/<robot_name>/image``.
-
-The RMTT multi-drone defaults use high camera FPS with 480p video at 2 Mbit/s.
-Install ``python3-av`` before enabling a camera. Video decoding uses PyAV rather
-than DJI's legacy ``libmedia_codec`` H.264 wrapper, which is not safe with the
-current Ubuntu/FFmpeg combination. ``libmedia_codec`` is needed only for EP
-audio decoding.
-This avoids saturating a 2.4 GHz access point and avoids repeatedly
-serializing stale 720p frames. Increase bitrate and resolution only after
-checking all feeds together.
-
-The EP/Core feed follows DJI's SDK sequence and connects to the robot's TCP
-video port 40921. Its supported resolutions are ``360p``, ``540p``, and
-``720p``.
-
-EP chassis and gimbal telemetry
--------------------------------
-
-Set ``pub_position: True`` under ``rmep`` in ``rmep_param.yaml`` to publish
-``geometry_msgs/PoseStamped`` on ``/<robot_name>/position`` at 10 Hz. Position
-is published in ``pose.position`` and orientation is published in
-``pose.orientation`` as a quaternion computed from chassis attitude.
-
-Set ``pub_gimbal_angle: True`` to publish
-``robomaster_interface/msg/GimbalAngle`` on ``/<robot_name>/gimbal_angle`` at
-10 Hz. This topic is available only when the connected robot has the EP/S1
-gimbal. EP Core robots without a gimbal log a warning and do not create the
-topic.
-
-LED controls
-------------
-
-EP/S1 robots with a gimbal provide selective gimbal armor and blaster LED
-services. RGB channels follow DJI's 0--255 range (the alpha channel is
-ignored), and gimbal LED indices are 0--7. An empty ``led_list`` selects DJI's
-default indices 0--3.
+Start the server with the configured YAML values:
 
 .. code-block:: bash
 
-    ros2 service call /rmep_1/led_gimbal robomaster_interface/srv/GimbalLED "{on: true, which: 'top_left', led: {r: 255.0, g: 0.0, b: 0.0, a: 0.0}, led_list: [0, 2, 4, 6]}"
-    ros2 service call /rmep_1/led_blaster robomaster_interface/srv/BlasterLED "{on: true, brightness: 128}"
+   ros2 launch robomaster_ros2 robomaster_server.launch.py
 
-RMTT drones provide ``/<drone_name>/set_mled`` with
-``robomaster_interface/srv/TelloMled``. Use ``mled_char`` for built-in
-characters (single alphanumeric or named patterns) or set
-``mled_char: 'custom'`` with a 64-character ``graph``. Graph characters are
-``0`` (off), ``r`` (red), ``b`` (blue), and ``p`` (purple).
+For explicit counts, also supply the intended LAN address. For example, after
+setting ``ROBOT_LAN_IP`` to the PC's address:
 
 .. code-block:: bash
 
-    ros2 service call /rmtt_1/set_mled robomaster_interface/srv/TelloMled "{brightness: 64, color: 'r', mled_char: 'A', graph: '', scroll_dir: '', freq: 0.0}"
-    ros2 service call /rmtt_1/set_mled robomaster_interface/srv/TelloMled "{brightness: 0, color: 'b', mled_char: 'custom', graph: '00bbbb000b0000b0b0b00b0b000000000000000000b00b00000bb00000000000', scroll_dir: '', freq: 0.0}"
+   ros2 launch robomaster_ros2 robomaster_server.launch.py \
+     num_of_drones:=1 num_of_eps1:=1 local_ip:="$ROBOT_LAN_IP" \
+     random_assign:=false keyboard_cmd:=false
 
-EP battery and armor
+When keyboard control is enabled, Alt+A arms all registered drones, Alt+T
+requests takeoff, Alt+L requests landing and Alt+E requests emergency stop.
+Disable server keyboard shortcuts when another tool owns motion commands.
+
+Direct camera images
 --------------------
 
-EP/Core/S1 battery percentage is cached from DJI DDS and exposed using the same
-Trigger-service shape as an RMTT. A request made before the first DDS sample
-returns ``success: false`` instead of an invented value.
+Enable ``pub_cam`` for the intended devices. Both RMTT and EP/Core drivers
+publish directly on ``/<name>/image`` using ``sensor_msgs/msg/Image`` with
+``bgr8`` encoding. QoS is best-effort, volatile and depth one. In RViz choose
+the raw image topic and Best Effort reliability; a reliable-only subscriber
+does not match this publisher.
+
+Video is decoded with PyAV. The ROS header uses the device name as ``frame_id``
+and the node clock at publication as the timestamp. ``publish_fps`` is a ceiling,
+not a guaranteed delivered frequency: Wi-Fi, device capture, decoding and
+subscriber load can reduce it. No compression plugin or extra bridge process
+is used. Standard ROS topic remapping applies to the direct publisher.
+
+RMTT FPS, bitrate and resolution live under ``rmtt.camera``; direction is
+selected per drone. EP/Core supports 360p, 540p and 720p and receives the device
+video stream on TCP port 40921. See :ref:`configuration` for camera controls.
+Stopping/removing a device stops its video path; the device node owns its ROS
+publisher. The optional legacy ``libmedia_codec`` binding is for EP audio only.
+
+Motion gate and telemetry
+-------------------------
+
+Use ``set_armed`` for the chassis/gimbal or RMTT flight gate when arming is
+required:
 
 .. code-block:: bash
 
-    ros2 service call /rmep_1/get_battery std_srvs/srv/Trigger "{}"
-    ros2 topic echo /rmep_1/armor_hit
-    ros2 topic echo /rmep_1/ir_hit
-    ros2 service call /rmep_1/set_armor_sensitivity robomaster_interface/srv/SetArmorSensitivity "{component: 'bottom_all', sensitivity: 5}"
+   ros2 service call /rmtt_1/set_armed std_srvs/srv/SetBool "{data: true}"
+   ros2 service call /rmep_1/set_armed std_srvs/srv/SetBool "{data: true}"
 
-``armor_hit`` contains armor ID, component, hit type (``water`` or ``ir``), and
-impact strength. ``ir_hit`` contains a cumulative count plus DJI skill, role,
-receiver-device, and IR-pin fields. Set ``armor.enabled: False`` to disable both
-event subscriptions and the sensitivity service.
+Refresh non-zero gated velocities within the configured ``command_timeout``.
+Expiry sends chassis/gimbal zeros or an RMTT RC hover command. A latched
+expiry requires rearming. Disarming explicitly stops these gated channels.
+This gate does not cover the current EP arm velocity stream.
+
+Enable ``pub_position`` for ``/<robot>/position`` (PoseStamped). Publication
+waits for position and chassis-attitude samples, and orientation is a quaternion
+with yaw relative to the first attitude sample. This is chassis telemetry,
+not externally measured world pose. ``pub_gimbal_angle`` enables GimbalAngle
+feedback on models with a gimbal. EP battery percentage comes from DDS;
+``get_battery`` returns failure until a battery sample is available.
+
+LEDs and armor
+--------------
+
+Ground robots provide ``led_chassis``. Gimbal-equipped robots additionally
+provide ``led_gimbal`` and ``led_blaster``. RGB channels use 0--255; gimbal LED
+indices are 0--7 and an empty selection uses the driver's default indices 0--3.
+
+.. code-block:: bash
+
+   ros2 service call /rmep_1/led_blaster robomaster_interface/srv/BlasterLED "{'on': true, brightness: 128}"
+   ros2 service call /rmtt_1/set_mled robomaster_interface/srv/TelloMled "{brightness: 64, color: 'r', mled_char: 'A', graph: '', scroll_dir: '', freq: 0.0}"
+
+RMTT matrix LEDs accept a character or a 64-character custom graph using
+``0``, ``r``, ``b`` and ``p``. Armor support publishes ``armor_hit`` and
+``ir_hit`` events and exposes ``set_armor_sensitivity``. The armor topic includes
+component/type/strength; IR feedback includes cumulative count and receiver
+metadata. Event topics do not need to publish continuously.
 
 EP Core gripper
 ---------------
 
-The existing percentage service accepts 0, 25, 50, 75, or 100 and returns as
-soon as the operation is queued. Observe ``gripper_state`` for busy/completion
-state and the estimated percentage. At startup, first command an endpoint; an
-intermediate percentage is rejected while position is unknown.
+``gripper`` accepts percentage targets 0, 25, 50, 75 and 100, returning after
+acceptance. ``gripper_state`` reports busy/completion state and the estimate.
+``gripper_command`` accepts ``open``, ``close``, ``pause`` or ``reset``;
+``set_gripper_mode`` selects ``timed`` or ``feedback`` control.
 
 .. code-block:: bash
 
-    ros2 topic echo /rmep_1/gripper_state
-    ros2 service call /rmep_1/gripper robomaster_interface/srv/Gripper "{distance: 100}"
-    ros2 service call /rmep_1/set_gripper_mode robomaster_interface/srv/SetGripperMode "{mode: 'feedback'}"
-    ros2 service call /rmep_1/gripper_command robomaster_interface/srv/GripperCommand "{command: 'close', power: 50}"
-    ros2 service call /rmep_1/gripper_command robomaster_interface/srv/GripperCommand "{command: 'pause', power: 0}"
-    ros2 service call /rmep_1/gripper_command robomaster_interface/srv/GripperCommand "{command: 'reset', power: 50}"
+   ros2 service call /rmep_1/gripper robomaster_interface/srv/Gripper "{distance: 100}"
+   ros2 service call /rmep_1/set_gripper_mode robomaster_interface/srv/SetGripperMode "{mode: 'feedback'}"
+   ros2 service call /rmep_1/gripper_command robomaster_interface/srv/GripperCommand "{command: 'pause', power: 0}"
 
-DJI reports only ``opened``, ``closed``, and ``normal``; it does not report a
-continuous gripper percentage. Feedback mode therefore waits for hardware
-feedback at 0% and 100%, while intermediate targets explicitly fall back to the
-configured timing calibration. Timed and feedback waits run in a per-robot
-worker, so one robot's gripper does not block callbacks for the other robots.
-Pausing or failing after motion begins marks the percentage unknown; recalibrate
-at 0% or 100% before requesting another intermediate percentage. The configured
-full-travel time is power-specific and should be recalibrated when power changes.
+Hardware feedback reports only opened/closed/normal, not a continuous percentage.
+Feedback mode confirms endpoints; intermediate targets use calibrated timing.
+At startup, or after an interrupted/failed movement invalidates the estimate,
+command an endpoint before an intermediate target. Recalibrate full-travel time
+if the configured power changes.
 
-EP Core robotic arm
--------------------
+EP Core tracked arm services
+----------------------------
 
-Relative and absolute calls use metres. The response reports whether the action
-was accepted, its ID, current state/percentage, and whether it completed during
-the service call. Leave ``wait_for_completion`` false for a non-blocking call,
-or set it true with a finite timeout of at most 60 seconds. Always monitor
-``arm_action_status``.
+``move_arm`` is relative and ``move_arm_to`` absolute, using X/Z metres. The
+response contains acceptance, action ID, state, percentage and completion.
+Relative moves clamp X to +/-0.22 m and Z to +/-0.15 m; out-of-range absolute
+targets are rejected. Optional completion waits must be finite and at most
+60 seconds; a non-positive request timeout selects ``arm.completion_timeout``.
 
 .. code-block:: bash
 
-    ros2 topic echo /rmep_1/arm_action_status
-    ros2 service call /rmep_1/move_arm robomaster_interface/srv/MoveArm "{x: 0.02, z: 0.01, wait_for_completion: false, timeout: 0.0}"
-    ros2 service call /rmep_1/move_arm_to robomaster_interface/srv/MoveArm "{x: 0.10, z: 0.05, wait_for_completion: true, timeout: 8.0}"
-    ros2 service call /rmep_1/cancel_arm std_srvs/srv/Trigger "{}"
-    ros2 service call /rmep_1/recenter_arm std_srvs/srv/Trigger "{}"
-    ros2 service call /rmep_1/reset_arm std_srvs/srv/Trigger "{}"
+   ros2 service call /rmep_1/move_arm robomaster_interface/srv/MoveArm "{x: 0.02, z: 0.01, wait_for_completion: false, timeout: 0.0}"
+   ros2 service call /rmep_1/cancel_arm std_srvs/srv/Trigger "{}"
 
-``recenter_arm`` starts an absolute move to zero. ``reset_arm`` first cancels an
-active action and then recenters; this is explicit driver behavior because DJI's
-SDK leaves its separate arm ``reset`` method unimplemented.
+``arm_action_status`` describes tracked actions. ``recenter_arm`` starts an
+absolute move to zero; ``reset_arm`` cancels an active action and recenters,
+because there is no distinct implemented SDK hardware reset. ``arm_position``
+is a legacy PointStamped topic that passes DDS values through; do not infer
+its units from the metre-based service interface.
 
-Launch arguments for `robomaster_server.launch.py`:
+EP Core arm velocity stream
+---------------------------
 
-.. note:: 
-    This values will override the parameters indicated in the `robomaster_server.yaml` file if num_of_drones or num_of_eps1 are non zero.
+``/<name>/arm_cmd_vel`` accepts Twist ``linear.x`` and ``linear.z`` in m/s.
+Other components are ignored. The current server uses 20 Hz timer output,
+clamps each velocity to +/-0.20 m/s and each relative increment to +/-0.03 m,
+and stops issuing increments after 0.25 seconds without a command. The deadline
+uses the ROS node clock. An increment already dispatched can finish.
 
-- `num_of_drones`: Number of drones to be added in the server
-- `num_of_eps1`: Number of eps1 to be added in the server
-- `local_ip`: Local IP address of the computer running the server
-- `random_assign`: Random assignment for drone/robot allocation
-- `keyboard_cmd`: Enable keyboard command control for drones
+These settings are driver constructor defaults, not YAML/launch parameters.
+Zero X/Z velocities stop new increments. The stream skips dispatch while a
+tracked arm action is observed busy; stream increments themselves are untracked.
 
-.. code-block:: text
+Current limitations: the stream does not check ``set_armed`` or explicitly
+reject NaN/Inf, and disarm/expiry do not clear the cached command. The busy check
+and dispatch are separate, so concurrent streaming and tracked services do not
+have an atomic priority handoff. Stop the streaming publisher and send an
+explicit zero instead of relying on disarm to stop this arm path. These are
+implementation limits, not functionality supplied by the motion gate.
 
-    Keyboard commands:
-    Press <alt>+a to arm all the drones
-    Press <alt>+e for an emergency call to all drones
-    Press <alt>+l to land all drones
-    Press <alt>+t to takeoff all drones
+See :ref:`fleet_tools` for joystick and diagnostic behavior, including their
+current monitoring and stop limitations.

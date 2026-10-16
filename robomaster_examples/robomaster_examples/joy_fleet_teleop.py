@@ -20,17 +20,12 @@
 
 from __future__ import annotations
 
-from math import isfinite
-import signal
 import sys
-from time import monotonic
 from typing import Dict, List
 
 import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
-from rclpy.parameter import Parameter
-from rclpy.signals import SignalHandlerOptions
 from robomaster_interface.msg import GimbalVel
 from robomaster_interface.srv import GripperCommand, Takeoff
 from sensor_msgs.msg import Joy
@@ -63,8 +58,8 @@ class JoyFleetTeleop(Node):
     def __init__(self) -> None:
         super().__init__('joy_fleet_teleop')
 
-        self.declare_parameter('robot_names', Parameter.Type.STRING_ARRAY)
-        self.declare_parameter('drone_names', Parameter.Type.STRING_ARRAY)
+        self.declare_parameter('robot_names', [])
+        self.declare_parameter('drone_names', [])
         self.declare_parameter('robot_names_csv', 'rmep_1')
         self.declare_parameter('drone_names_csv', 'rmtt_1')
         self.declare_parameter('start_mode', 'robot')
@@ -72,7 +67,6 @@ class JoyFleetTeleop(Node):
         self.declare_parameter('publish_rate', 20.0)
         self.declare_parameter('deadzone', 0.1)
         self.declare_parameter('require_deadman', True)
-        self.declare_parameter('joy_timeout', 0.5)
         self.declare_parameter('stream_status_line', True)
         self.declare_parameter('show_control_legend', True)
         self.declare_parameter('robot_max_linear', 1.8)
@@ -92,9 +86,6 @@ class JoyFleetTeleop(Node):
         self.takeoff_height = float(self.get_parameter('takeoff_height').value)
         self.deadzone = float(self.get_parameter('deadzone').value)
         self.require_deadman = bool(self.get_parameter('require_deadman').value)
-        self.joy_timeout = float(self.get_parameter('joy_timeout').value)
-        if not isfinite(self.joy_timeout) or self.joy_timeout <= 0.0:
-            raise ValueError('joy_timeout must be finite and positive')
         self.stream_status_line = bool(self.get_parameter('stream_status_line').value)
         self.show_control_legend = bool(self.get_parameter('show_control_legend').value)
         self.robot_max_linear = float(self.get_parameter('robot_max_linear').value)
@@ -113,8 +104,6 @@ class JoyFleetTeleop(Node):
         self.axes: List[float] = []
         self.buttons: List[int] = []
         self.prev_buttons: List[int] = []
-        self._last_joy_at = None
-        self._input_stopped = False
         self.last_warn_ns: Dict[str, int] = {}
         self._status_line_width = 0
 
@@ -181,7 +170,7 @@ class JoyFleetTeleop(Node):
         self._status_info(f'Ready | {self._active_target_summary()} | hold L1 to move')
 
     def _parse_name_list(self, array_key: str, csv_key: str) -> List[str]:
-        array_val = self.get_parameter_or(array_key).value
+        array_val = self.get_parameter(array_key).value
         if isinstance(array_val, list):
             names = [str(v).strip() for v in array_val if str(v).strip()]
             if names:
@@ -191,15 +180,11 @@ class JoyFleetTeleop(Node):
         return names
 
     def _joy_cb(self, msg: Joy) -> None:
-        self._last_joy_at = monotonic()
-        was_deadman = self._button_down(self.BTN_L1)
         buttons = [int(v) for v in msg.buttons]
         if len(self.prev_buttons) != len(buttons):
             self.prev_buttons = [0] * len(buttons)
         self.axes = list(msg.axes)
         self.buttons = buttons
-        if self.require_deadman and was_deadman and not self._button_down(self.BTN_L1):
-            self._stop_all_motion()
 
         if self._just_pressed(self.BTN_START, buttons):
             self._toggle_armed()
@@ -219,14 +204,12 @@ class JoyFleetTeleop(Node):
             if not self.robot_names:
                 self._status_warn('No robots configured to cycle.')
                 return
-            self._stop_robot_motion(self.current_robot_name)
             self.active_robot_idx = (self.active_robot_idx + 1) % len(self.robot_names)
             self._status_info(f'Active robot: {self.current_robot_name}')
             return
         if not self.drone_names:
             self._status_warn('No drones configured to cycle.')
             return
-        self._stop_drone_motion(self.current_drone_name)
         self.active_drone_idx = (self.active_drone_idx + 1) % len(self.drone_names)
         self._status_info(f'Active drone: {self.current_drone_name}')
 
@@ -317,16 +300,8 @@ class JoyFleetTeleop(Node):
         )
 
     def _publish_motion(self) -> None:
-        if (
-            not self.axes
-            or self._last_joy_at is None
-            or monotonic() - self._last_joy_at >= self.joy_timeout
-        ):
-            if not self._input_stopped:
-                self._stop_all_motion()
-                self._input_stopped = True
+        if not self.axes:
             return
-        self._input_stopped = False
         if self.mode == 'robot':
             self._publish_robot_motion()
         else:
@@ -351,7 +326,7 @@ class JoyFleetTeleop(Node):
             twist.linear.x = left_y * self.robot_max_linear
             twist.linear.y = -left_x * self.robot_max_linear
             twist.angular.z = 0.0 if gimbal_layer else -right_x * self.robot_max_yaw
-        self.robot_cmd_pubs[name].publish(twist)
+            self.robot_cmd_pubs[name].publish(twist)
 
         gimbal = GimbalVel()
         if motion_enabled and gimbal_layer:
@@ -391,28 +366,7 @@ class JoyFleetTeleop(Node):
             twist.linear.y = left_x * self.drone_max_linear
             twist.linear.z = (up - down) * self.drone_max_linear
             twist.angular.z = right_x * self.drone_max_yaw
-        self.drone_cmd_pubs[name].publish(twist)
-
-    def _stop_robot_motion(self, name: str) -> None:
-        self.robot_cmd_pubs[name].publish(Twist())
-        self.robot_gimbal_pubs[name].publish(GimbalVel())
-        self.robot_arm_cmd_pubs[name].publish(Twist())
-
-    def _stop_drone_motion(self, name: str) -> None:
-        self.drone_cmd_pubs[name].publish(Twist())
-
-    def _stop_all_motion(self) -> None:
-        for name in self.robot_names:
-            self._stop_robot_motion(name)
-        for name in self.drone_names:
-            self._stop_drone_motion(name)
-
-    def stop_motion(self) -> None:
-        self.motion_timer.cancel()
-        self.axes = []
-        self.buttons = []
-        if self.context.ok():
-            self._stop_all_motion()
+            self.drone_cmd_pubs[name].publish(twist)
 
     def _call_service(self, client, request, label: str, log_success: bool = True):
         if not client.wait_for_service(timeout_sec=0.0):
@@ -584,7 +538,7 @@ class JoyFleetTeleop(Node):
             Y: land                          \tA: hover
             '''
         )
-
+    
     @property
     def current_robot_name(self) -> str | None:
         if not self.robot_names:
@@ -601,32 +555,14 @@ class JoyFleetTeleop(Node):
 
 
 def main(args=None) -> None:
-    rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
-    node = None
-    previous_handlers = {}
-
-    def request_stop(_signal_number, _frame):
-        raise KeyboardInterrupt
-
+    rclpy.init(args=args)
+    node = JoyFleetTeleop()
     try:
-        node = JoyFleetTeleop()
-        for signal_number in (signal.SIGINT, signal.SIGTERM):
-            previous_handlers[signal_number] = signal.signal(signal_number, request_stop)
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
-    finally:
-        for signal_number, handler in previous_handlers.items():
-            signal.signal(signal_number, handler)
-        try:
-            if node is not None:
-                try:
-                    node.stop_motion()
-                finally:
-                    node.destroy_node()
-        finally:
-            if rclpy.ok():
-                rclpy.shutdown()
+    node.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':

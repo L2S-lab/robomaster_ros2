@@ -48,7 +48,7 @@ param_server:
   # topic_type: Pose/ PoseStamped/ Point/ PointStamped
       rmep_1:
         ip: "192.168.0.161"
-        pub_cam: False
+        pub_cam: True
         ext_pose_topic_type: PoseStamped
         ext_pose_topic_name: /rmep_1/pose
 

@@ -2,7 +2,6 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -32,17 +31,11 @@ def generate_launch_description():
             default_value='true',
             description='Require holding buttons[4] for motion commands',
         ),
-        DeclareLaunchArgument(
-            'joy_timeout',
-            default_value='0.5',
-            description='Seconds without joystick input before stopping motion',
-        ),
         Node(
             package='joy',
             executable='joy_node',
             name='joy_node',
             output='screen',
-            parameters=[{'autorepeat_rate': 20.0}],
         ),
         Node(
             package='robomaster_examples',
@@ -53,12 +46,8 @@ def generate_launch_description():
                 'robot_names_csv': LaunchConfiguration('robot_names'),
                 'drone_names_csv': LaunchConfiguration('drone_names'),
                 'start_mode': LaunchConfiguration('start_mode'),
-                'takeoff_height': ParameterValue(
-                    LaunchConfiguration('takeoff_height'), value_type=float),
-                'require_deadman': ParameterValue(
-                    LaunchConfiguration('require_deadman'), value_type=bool),
-                'joy_timeout': ParameterValue(
-                    LaunchConfiguration('joy_timeout'), value_type=float),
+                'takeoff_height': LaunchConfiguration('takeoff_height'),
+                'require_deadman': LaunchConfiguration('require_deadman'),
             }],
         ),
     ])
