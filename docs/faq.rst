@@ -58,5 +58,5 @@ Reporting problems
 
 Include the source revision, device models/names, launch command, relevant
 configuration, sourced workspace and complete error output. Use the project's
-GitLab issue tracker at
-https://gitlab-research.centralesupelec.fr/aarsht7/robomaster_ros2/-/issues.
+GitHub issue tracker at
+https://github.com/L2S-lab/robomaster_ros2/issues.

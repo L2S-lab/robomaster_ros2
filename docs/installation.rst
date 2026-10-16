@@ -47,7 +47,7 @@ For a new workspace, obtain the source:
 
    mkdir -p ros2_ws/src
    cd ros2_ws/src
-   git clone https://gitlab-research.centralesupelec.fr/aarsht7/robomaster_ros2.git
+   git clone https://github.com/L2S-lab/robomaster_ros2.git
    cd ..
 
 For an existing workspace, start in its root directory, which contains ``src``.
