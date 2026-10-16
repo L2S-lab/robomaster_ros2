@@ -1,0 +1,7 @@
+# command: open, close, pause, or reset
+string command
+# Used by open, close, and reset. 0 uses configured default; otherwise 1-100.
+uint8 power
+---
+bool success
+string message

@@ -3,57 +3,69 @@
 Installation
 ============
 
-robomaster_ros2 runs on **Ubuntu Linux**, tested with following configuration:
+The hardware driver targets Ubuntu 22.04, Python 3.10 and ROS 2 Humble. Gazebo
+is not required to connect to physical robots or run the hardware examples.
 
-====== ======== ====== 
-Ubuntu Python   ROS 2
------- -------- ------
-22.04  3.10     Humble
-====== ======== ======
+Dependencies
+------------
 
-.. warning::
-   Avoid using a virtual machine if possible: they add additional latency and might cause issues with the network setup.
+Install ROS 2 Humble first, then install the driver/example dependencies:
 
-First Installation
-------------------
+.. code-block:: bash
 
-1. If needed, install ROS 2 using the instructions at https://docs.ros.org/en/humble/Installation.html
+   source /opt/ros/humble/setup.bash
+   sudo apt install network-manager python3-av python3-netifaces python3-numpy \
+     python3-matplotlib python3-pip \
+     python3-yaml python3-opencv python3-colcon-common-extensions \
+     ros-humble-tf-transformations ros-humble-cv-bridge \
+     ros-humble-tf2-ros ros-humble-tf2-geometry-msgs ros-humble-nav-msgs \
+     ros-humble-joy
+   python3 -m pip install pillow myqr pynput
 
-2. If needed, install gzsim Harmonic using this instruction at https://gazebosim.org/docs/latest/ros_installation/#gazebo-harmonic-with-ros-2-humble-or-rolling-use-with-caution
+``joy`` supplies the joystick input node. It must be installed explicitly for
+the current teleoperation launcher. Cameras use PyAV to decode the device's
+H.264 stream and publish raw ROS images directly; no compression bridge is
+required. Package manifests declare dependencies but ``colcon build`` does not
+install system packages.
 
-3. Install dependencies
+Optional EP audio support uses the legacy SDK binding:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-      pip install pillow myqr pynput
-      sudo apt-get install network-manager libopus-dev
-      sudo apt install ros-$ROS_DISTRO-tf-transformations ros-$ROS_DISTRO-nav-msgs
+   sudo apt install libopus-dev
+   python3 -m pip install git+https://github.com/aarsht7/RoboMaster-SDK.git@libmedia_codec
 
-   Optional Installation for video streaming
+That binding is not the video decoder. The driver uses PyAV for video to avoid
+the older H.264 binding's native-memory failures.
 
-   .. code-block:: bash
+Source and build
+----------------
 
-      pip install git+https://github.com/aarsht7/RoboMaster-SDK.git@libmedia_codec
+For a new workspace, obtain the source:
 
-4. Set up ROS 2 workspace
+.. code-block:: bash
 
-    .. code-block:: bash
+   mkdir -p ros2_ws/src
+   cd ros2_ws/src
+   git clone https://github.com/L2S-lab/robomaster_ros2.git
+   cd ..
 
-        mkdir -p ros2_ws/src
-        cd ros2_ws/src
-        git clone https://github.com/L2S-lab/robomaster_ros2.git
+For an existing workspace, start in its root directory, which contains ``src``.
+Build the hardware packages and their dependencies:
 
-5. Build ROS 2 workspace
+.. code-block:: bash
 
-    .. code-block:: bash
+   source /opt/ros/humble/setup.bash
+   colcon build --symlink-install --packages-up-to robomaster_ros2 robomaster_examples
+   source install/setup.bash
 
-        cd ../
-        source /opt/ros/$ROS_DISTRO/setup.bash
-        colcon build --symlink-install robomaster_interface robomaster_ros2 robomaster_examples robomaster_gz
+The build includes ``robomaster_interface``. It does not select the simulation
+package. Source the ROS setup and this workspace's overlay in each terminal
+used for the driver or examples. Avoid mixing overlays from another checkout.
 
-    .. note::
-       symlink-install allows you to edit Python and config files without running `colcon build` every time.
+After changing interface definitions, rebuild the interface and its consumers.
+With symlink installation, Python source is linked where supported; rebuild
+after changing installed resources, package metadata or executable registration.
 
-    .. note::
-       If you install it for the first time, it will check for some dependencies
-       As long as the build of the package finish, you can ignore any other warnings.
+Next, configure the network and devices using :ref:`configuration`, then follow
+:ref:`howtos` to start the server.

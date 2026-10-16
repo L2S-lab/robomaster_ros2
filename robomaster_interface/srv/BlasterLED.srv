@@ -1,0 +1,6 @@
+# Control the white LED in the EP/S1 blaster.
+bool on
+uint8 brightness               # 0..255; ignored when on is false
+---
+string message
+bool success

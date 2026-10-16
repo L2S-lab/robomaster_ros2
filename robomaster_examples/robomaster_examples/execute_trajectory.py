@@ -7,6 +7,7 @@ import rclpy.time
 from rclpy.node import Node
 import numpy as np
 from os.path import join
+import tf_transformations
 
 from geometry_msgs.msg import Twist
 from tf2_ros.transform_listener import TransformListener, Buffer
@@ -30,7 +31,7 @@ class execute_trajectory(Node):
             ('takeoff_time', 0.0),
 
         ])
-        self.ready = False
+        self.ready = True
         self.trajectory = self.get_parameter('trajectory').value
         self.world_frame = self.get_parameter('world_frame').value
         self.frequency = self.get_parameter('frequency').value
@@ -45,16 +46,15 @@ class execute_trajectory(Node):
         self.hover_cli = self.create_client(Empty, f'/{self.robot}/hover')
         self.land_cli = self.create_client(Trigger, f'/{self.robot}/land')
         if not self.ready:
-            while not self.hover_cli.wait_for_service(timeout_sec=1.0) \
+            while not self.takeoff_cli.wait_for_service(timeout_sec=1.0) \
+                    or not self.hover_cli.wait_for_service(timeout_sec=1.0) \
                     or not self.land_cli.wait_for_service(timeout_sec=1.0):
-                    #or not self.takeoff_cli.wait_for_service(timeout_sec=1.0):
-                self.get_logger().info('landing or hover service not available, waiting again...')
+                self.get_logger().info('service not available, waiting again...')
         self.get_logger().info('service available')
         self._future = None
-        self.ready = True
-        # self.takeoff_req = Takeoff.Request()
-        # self.takeoff_req.height = self.takeoff_height
-        # self.takeoff_req.sync = False
+        self.takeoff_req = Takeoff.Request()
+        self.takeoff_req.height = self.takeoff_height
+        self.takeoff_req.sync = False
         self.land_req = Trigger.Request()
         self.hover_req = Empty.Request()
             
@@ -70,21 +70,21 @@ class execute_trajectory(Node):
         self._timer = self.create_timer(1.0/self.frequency, self.control_loop)
         self.start_time = time.time()
 
-    # def send_takeoff_request(self):
-    #     time.sleep(self.takeoff_time)
-    #     self._future = self.takeoff_cli.call_async(self.takeoff_req)
-    #     self._future.add_done_callback(self.takeoff_response)
+    def send_takeoff_request(self):
+        time.sleep(self.takeoff_time)
+        self._future = self.takeoff_cli.call_async(self.takeoff_req)
+        self._future.add_done_callback(self.takeoff_response)
 
-    # def takeoff_response(self, future):
-    #     response = future.result()
-    #     if response.success:
-    #         self.get_logger().info('takeoff request sent!')
-    #         self.ready = True
-    #         self._future = None
-    #     else:
-    #         self.get_logger().info('takeoff request failed')
-    #         self.ready = False
-    #         self._future = None
+    def takeoff_response(self, future):
+        response = future.result()
+        if response.success:
+            self.get_logger().info('takeoff request sent!')
+            self.ready = True
+            self._future = None
+        else:
+            self.get_logger().info('takeoff request failed')
+            self.ready = False
+            self._future = None
 
     def send_land_request(self):
         self._future = self.land_cli.call_async(self.land_req)
@@ -107,12 +107,18 @@ class execute_trajectory(Node):
 
     def get_transform(self, source_frame, target_frame):
         return self.tfBuffer.lookup_transform(source_frame, target_frame, rclpy.time.Time())
+
+    def extract_yaw_from_quaternion(self, quaternion):
+        """Extract yaw from quaternion"""
+        quaternion_array = [quaternion.x, quaternion.y, quaternion.z, quaternion.w]
+        _, _, yaw = tf_transformations.euler_from_quaternion(quaternion_array)
+        return yaw
     
     def control_loop(self):
         # if not self.ready and self._future is None:
         #     self.send_takeoff_request()
-        # if not self.ready:
-        #     pass
+        if not self.ready:
+            pass
         if self.ready:
             dt = time.time()-self.start_time-self.time
             self.time = time.time()-self.start_time
@@ -122,14 +128,22 @@ class execute_trajectory(Node):
                 transform = None
                 return
             current = np.array([transform.transform.translation.x, transform.transform.translation.y, transform.transform.translation.z])
-            current = np.append(current)
+            yaw = self.extract_yaw_from_quaternion(transform.transform.rotation)
+            current = np.append(current, yaw)
+            self.get_logger().info(f'{current}')
             u, _, _, _ = self.traj.get_control(self.time, dt, current, self.prev_positions)
             msg = Twist()
             try:
-                if u is not None and self.ready:  
+                if u is not None and self.ready:
+                    self.get_logger().info(f'----------------------------')
+                    #self.get_logger().info(f'{self.time}\t {dt}')
+                    #self.get_logger().info(f'{round(u[0],2)}\t {round(u[1],2)}\t {round(u[2],2)}')
+                    #self.get_logger().info(f'{round(p_ref[0],2)}\t {round(p_ref[1],2)}\t {round(p_ref[2],2)}')
                     msg.linear.x = -1*max(min(u[0], 1.0), -1.0)
                     msg.linear.y = -1*max(min(u[1], 1.0), -1.0)
                     msg.linear.z = max(min(u[2], 1.0), -1.0)
+                    self.get_logger().info(f'{ round(msg.linear.x,2)}\t {round(msg.linear.y,2)}\t {round(msg.linear.z,2)}')
+                    #msg.angular.z = u[3]
                     
                 self.pub.publish(msg)
                 if u is None:

@@ -79,9 +79,14 @@ def enable_sdk_drone(drone_ip, timeout=2, retry=5):
                 sock.close()
             return True
         except socket.timeout:
-            pass
+            logger.warning(f"Timeout while enabling SDK mode, retrying... ({5-retry}/5)")
+            sock.close()
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.settimeout(1)
+            sock.sendto(cmd.encode('utf-8'), (drone_ip, TELLO_DEVICE_PORT))
         sock.close()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(1)
         sock.sendto(cmd.encode('utf-8'), (drone_ip, TELLO_DEVICE_PORT))
     sock.close()
     return False

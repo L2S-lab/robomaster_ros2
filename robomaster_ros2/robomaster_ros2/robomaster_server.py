@@ -1,5 +1,7 @@
 import rclpy
+#import rclpy.client
 from rclpy.node import Node
+#from rclpy.node import Client as rclpy_client
 from rclpy.task import Future
 from rclpy import Parameter
 from rclpy.executors import MultiThreadedExecutor
@@ -29,7 +31,6 @@ class RobomasterServer(Node):
         super().__init__('robomaster_server',
                         allow_undeclared_parameters=True,
                         start_parameter_services=True,)
-        # This is used for temporary media storage
         if os.path.exists(os.getcwd()+'/.tmp'):
             os.system('rm -rf '+os.getcwd()+'/.tmp')
 
@@ -47,8 +48,6 @@ class RobomasterServer(Node):
         self.add_robot_srv = self.create_service(AddRobot, 'add_robot', self.add_robot)
         self.add_drone_srv = self.create_service(AddDrone, 'add_drone', self.add_drone)
         self.rmv_robot_srv = self.create_service(RemoveRobot, 'remove_robot', self.rmv_robot)
-        self.takeoff_srv = self.create_service(Trigger, 'takeoff_all', self.takeoff_all)
-        self.land_srv = self.create_service(Trigger, 'land_all', self.land_all)
 
         self.num_of_drones = self.get_parameter('num_of_drones').value
         if self.num_of_drones>1:
@@ -65,7 +64,7 @@ class RobomasterServer(Node):
         else:
             self.robot_local_port = [globals.ROBOT_SDK_PORT_MIN]
             #self.robot_video_port = [globals.ROBOT_VIDEO_PORT_MIN]
-        
+
         self.random_assign = self.get_parameter('random_assign').value
         self.local_ip = self.get_parameter('local_ip').value
         self.keyboard_cmd = self.get_parameter('keyboard_cmd').value
@@ -77,11 +76,22 @@ class RobomasterServer(Node):
         if self.num_of_drones > 0:
             self.base_params_drone = call_get_parameters(self,'param_server', 'rmtt',['mled_display_num','external_position',
                                                                     'drone_name_list','pub_front_tof','pub_bottom_tof',
-                                                                    'pub_attitude','pub_barometer','pub_imu','pub_mpad'])
+                                                                    'pub_attitude','pub_barometer','pub_imu','pub_mpad',
+                                                                    'camera.fps','camera.bitrate',
+                                                                    'camera.resolution','camera.publish_fps',
+                                                                    'safety.command_timeout','safety.require_arm',
+                                                                    'safety.latch_deadman'])
         if self.num_of_eps1 > 0:
             self.base_params_robot = call_get_parameters(self,'param_server', 'rmep',['external_position', 'led_num',
                                                                     'robot_name_list','pub_imu','pub_cam','pub_marker',
-                                                                    'pub_armpose'])
+                                                                    'pub_armpose','pub_position','pub_gimbal_angle',
+                                                                    'camera.resolution',
+                                                                    'camera.publish_fps','armor.enabled',
+                                                                    'gripper.control_mode','gripper.power',
+                                                                    'gripper.full_travel_time',
+                                                                    'gripper.feedback_timeout',
+                                                                    'arm.completion_timeout','safety.command_timeout',
+                                                                    'safety.require_arm','safety.latch_deadman'])
         if self.keyboard_cmd:
             self.keyboard_paused = False
             self.armed = False
@@ -95,12 +105,18 @@ class RobomasterServer(Node):
         self.all_drones: Dict[str, Drone] = {}
         self.robots: Dict[str, Node] = {}
         self.all_robots: Dict[str, Robot] = {}
+        self.takeoff_srv = None
+        self.land_srv = None
         if self.num_of_drones>0:
             self.drone_server()
+        self._update_drone_fleet_services()
         if self.num_of_eps1>0:
             self.robot_server()
-        self.keyboard_listen = threading.Thread(target=self.run_hotkeys, daemon=True)
-        self.keyboard_listen.start()
+        if self.keyboard_cmd:
+            self.keyboard_listen = threading.Thread(
+                target=self.run_hotkeys, daemon=True
+            )
+            self.keyboard_listen.start()
         #self._timer = self.create_timer(0.1, self.timer_callback)
 
     def drone_server(self):
@@ -121,7 +137,14 @@ class RobomasterServer(Node):
                   "baro": self.base_params_drone['pub_barometer'],
                   "imu": self.base_params_drone['pub_imu'],
                   "cam": False,
+                  "camera_fps": self.base_params_drone['camera.fps'],
+                  "camera_bitrate": self.base_params_drone['camera.bitrate'],
+                  "camera_resolution": self.base_params_drone['camera.resolution'],
+                  "camera_publish_fps": self.base_params_drone['camera.publish_fps'],
                   "mpad": self.base_params_drone['pub_mpad'],
+                  "safety_command_timeout": self.base_params_drone['safety.command_timeout'],
+                  "safety_require_arm": self.base_params_drone['safety.require_arm'],
+                  "safety_latch_deadman": self.base_params_drone['safety.latch_deadman'],
                   "topic_name": None, "topic_type": None, "cam_direction": 0}
         if self.random_assign:
             conn = Connection()
@@ -142,6 +165,7 @@ class RobomasterServer(Node):
             self.create_drone(ip, drone_name, i, params, drone_param)
     
     def create_drone(self, ip, drone_name, number, params, drone_param=None):
+        params = params.copy()
         time.sleep(0.3)
         self.get_logger().info(f"Enabling SDK mode on drone with ip: {ip}")
         if enable_sdk_drone(ip):
@@ -161,7 +185,10 @@ class RobomasterServer(Node):
                 if drone_param[f'{drone_name}.pub_cam']:
                     params['cam'] = True
                     params['cam_direction'] = drone_param[f'{drone_name}.cam_direction']
-            te_conf._video_stream_addr = (self.local_ip, self.drone_video_port[number])
+            te_conf.video_stream_addr = (
+                self.local_ip, self.drone_video_port[number]
+            )
+            te_conf.video_stream_proto = "udp"
             sdk_conn = Connection(conf=te_conf)
             cli = TextClient(conn=sdk_conn)
             drone = Drone(node,conf=te_conf, cli=cli, params=params)
@@ -174,12 +201,30 @@ class RobomasterServer(Node):
                     if not drone._conf.number >9:
                         drone._set_mled(cmd=f"EXT mled s r {str(drone._conf.number)}")# async")
                 if params['cam']:
-                    drone.camera.set_fps('low', async_flag=True)
-                    drone.camera.set_bitrate(5, async_flag=True)
+                    if not drone.camera.set_fps(params['camera_fps']):
+                        self.get_logger().warning(
+                            f"Failed to set {drone_name} camera FPS to "
+                            f"{params['camera_fps']}"
+                        )
+                    if not drone.camera.set_bitrate(params['camera_bitrate']):
+                        self.get_logger().warning(
+                            f"Failed to set {drone_name} camera bitrate to "
+                            f"{params['camera_bitrate']}"
+                        )
+                    if not drone.camera.set_resolution(
+                            params['camera_resolution']):
+                        self.get_logger().warning(
+                            f"Failed to set {drone_name} camera resolution to "
+                            f"{params['camera_resolution']}"
+                        )
                     if params["cam_direction"] == 1:
                         drone.camera.set_down_vision(1)
                     time.sleep(0.1)
-                    drone.start_video()
+                    if not drone.start_video(
+                            publish_fps=params['camera_publish_fps']):
+                        self.get_logger().error(
+                            f"Failed to start camera stream for {drone_name}"
+                        )
                 self.all_drones[drone_name] = drone
                 self.executor.add_node(node)   
                 time.sleep(1)
@@ -205,7 +250,15 @@ class RobomasterServer(Node):
                 "attitude": self.base_params_drone['pub_attitude'],
                 "baro": self.base_params_drone['pub_barometer'],
                 "imu": self.base_params_drone['pub_imu'],
-                "cam": _cam, "mpad": self.base_params_drone['pub_mpad'],
+                "cam": _cam,
+                "camera_fps": self.base_params_drone['camera.fps'],
+                "camera_bitrate": self.base_params_drone['camera.bitrate'],
+                "camera_resolution": self.base_params_drone['camera.resolution'],
+                "camera_publish_fps": self.base_params_drone['camera.publish_fps'],
+                "mpad": self.base_params_drone['pub_mpad'],
+                "safety_command_timeout": self.base_params_drone['safety.command_timeout'],
+                "safety_require_arm": self.base_params_drone['safety.require_arm'],
+                "safety_latch_deadman": self.base_params_drone['safety.latch_deadman'],
                 "topic_name": _ext_pose_name, "topic_type": _ext_pose_type, 
                 "cam_direction": _dir}
         self.num_of_drones += 1
@@ -214,7 +267,7 @@ class RobomasterServer(Node):
         self.drone_video_port = self.add_port(self.drone_video_port, globals.TELLO_VIDEO_PORT_MIN, globals.TELLO_VIDEO_PORT_MAX)
         response.success= self.create_drone(_ip, _name, self.num_of_drones-1, params)
         response.message = f'Drone {_name} added'
-        
+        self._update_drone_fleet_services()
         return response
 
     def robot_server(self):
@@ -222,7 +275,20 @@ class RobomasterServer(Node):
                   "imu": self.base_params_robot['pub_imu'],
                   "cam": self.base_params_robot['pub_cam'],
                   "marker": self.base_params_robot['pub_marker'],
-                  "arm_position": self.base_params_robot['pub_armpose'],}
+                  "arm_position": self.base_params_robot['pub_armpose'],
+                  "chassis_position": self.base_params_robot['pub_position'],
+                  "gimbal_angle": self.base_params_robot['pub_gimbal_angle'],
+                  "camera_resolution": self.base_params_robot['camera.resolution'],
+                  "camera_publish_fps": self.base_params_robot['camera.publish_fps'],
+                  "armor_enabled": self.base_params_robot['armor.enabled'],
+                  "gripper_control_mode": self.base_params_robot['gripper.control_mode'],
+                  "gripper_power": self.base_params_robot['gripper.power'],
+                  "gripper_full_travel_time": self.base_params_robot['gripper.full_travel_time'],
+                  "gripper_feedback_timeout": self.base_params_robot['gripper.feedback_timeout'],
+                  "arm_completion_timeout": self.base_params_robot['arm.completion_timeout'],
+                  "safety_command_timeout": self.base_params_robot['safety.command_timeout'],
+                  "safety_require_arm": self.base_params_robot['safety.require_arm'],
+                  "safety_latch_deadman": self.base_params_robot['safety.latch_deadman'],}
         if self.random_assign:
             robot_ip_list = scan_robot_ip_list(self.num_of_eps1, timeout=3*self.num_of_eps1)
             robot_ip_list = sorted(robot_ip_list, key=lambda x: int(x.split('.')[-1]))
@@ -237,6 +303,7 @@ class RobomasterServer(Node):
             self.create_robot(ip, robot_name, i, params, robot_param)
     
     def create_robot(self, ip, robot_name, number, params, robot_param):
+        params = params.copy()
         local_port = self.robot_local_port[number]
         if enable_sdk_robot(ip,self.local_ip, local_port):
             node = rclpy.create_node(robot_name, namespace=robot_name)
@@ -247,6 +314,8 @@ class RobomasterServer(Node):
             ep_conf.cmd_proto = "v1"
             ep_conf.number = number+1
             ep_conf.default_sdk_addr = (self.local_ip, local_port)
+            ep_conf.video_stream_port = globals.ROBOT_VIDEO_PORT
+            ep_conf.video_stream_proto = globals.ROBOT_VIDEO_PROTO
             if params['ext_pose'] and robot_param is not None:
                 params['topic_name'] = robot_param[f'{robot_name}.ext_pose_topic_name']
                 params['topic_type'] = robot_param[f'{robot_name}.ext_pose_topic_type']
@@ -260,6 +329,12 @@ class RobomasterServer(Node):
             if ret:
                 self.get_logger().info(f"Robot initialized: {robot_name} : {robot._get_sn()}")
                 time.sleep(0.3)
+                if params['cam'] and not robot.start_video(
+                        resolution=params['camera_resolution'],
+                        publish_fps=params['camera_publish_fps']):
+                    self.get_logger().error(
+                        f"Failed to start camera stream for {robot_name}"
+                    )
                 self.all_robots[robot_name] = robot
                 self.executor.add_node(node)
                 time.sleep(1)
@@ -289,6 +364,7 @@ class RobomasterServer(Node):
             self.drones[_name].destroy_node()
             self.drones.pop(_name)
             self.all_drones.pop(_name)
+            self._update_drone_fleet_services()
             response.success = True
             response.message = f'Drone {_name} removed'
             return response
@@ -299,6 +375,20 @@ class RobomasterServer(Node):
         port_list = list(port_list)
         port_list.append(not_assigned.pop())
         return port_list
+
+    def _update_drone_fleet_services(self):
+        if self.all_drones and self.takeoff_srv is None:
+            self.takeoff_srv = self.create_service(
+                Trigger, 'takeoff_all', self.takeoff_all
+            )
+            self.land_srv = self.create_service(
+                Trigger, 'land_all', self.land_all
+            )
+        elif not self.all_drones and self.takeoff_srv is not None:
+            self.destroy_service(self.takeoff_srv)
+            self.destroy_service(self.land_srv)
+            self.takeoff_srv = None
+            self.land_srv = None
 
 
     def send_takeoff_request(self, req:Takeoff.Request, drone_name):
@@ -323,83 +413,33 @@ class RobomasterServer(Node):
                 self.remaining.remove(drone_name)
             
     def takeoff_all(self, request, response: Trigger.Response):
+        threads = []
         for drone in self.all_drones.values():
-            drone._takeoff(async_flag=True, retry=5)
-        # self.remaining = []
-        # self.takeoff_cli: Dict [str,rclpy_client]= {}
-        # self.takeoff_future: Dict [str,Future]= {}
-        # self.land_cli: Dict [str,rclpy_client]= {}
-        # self.land_future: Dict [str,Future]= {}
-        # self.remaining = list(self.all_drones.keys())
-        # for drone in self.all_drones.keys():
-        #     self.takeoff_cli[drone] = self.create_client(Takeoff, f'{drone}/takeoff')
-        #     self.land_cli[drone] = self.create_client(Trigger, f'{drone}/land')
-        #     if not self.takeoff_cli[drone].wait_for_service(timeout_sec=1.0) \
-        #             or not self.land_cli[drone].wait_for_service(timeout_sec=1.0):
-        #         response.success = False
-        #         response.message = f'{drone} service not available, waiting again...'
-        #         return response
-        # takeoff_req = Takeoff.Request()
-        # takeoff_req.height = 0.0
-        # for drone in self.all_drones.keys():
-        #     self.send_takeoff_request(takeoff_req, drone)
-        # start_time = time.time()
-        # while len(self.remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Takeoff failed for drones {self.remaining}'
-        #         return response
-        #     time.sleep(0.1)
-        # response.message = 'All drones take off done'
-        # response.success = True
-        
-        
-        # self.remaining = list(self.all_drones.keys())
-        # while len(remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Takeoff failed for drones {remaining}'
-        #         return response
-        #     for i in remaining:
-        #         ret = self.all_drones[i]._takeoff(async_flag=True, retry=3)
-        #         if ret:
-        #             remaining.remove(i)
-        #             time.sleep(0.5)
-        # response.message = 'All drones take off done'
-        # response.success = True
+            t = threading.Thread(target=drone._takeoff, kwargs={'async_flag': True, 'retry': 5})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
+        response.success = bool(threads)
+        response.message = (
+            f'Takeoff requested for {len(threads)} drone(s).'
+            if threads else 'No drones are connected.'
+        )
         return response
     
     def land_all(self, request, response:Trigger.Response):
+        threads = []
         for drone in self.all_drones.values():
-            drone._land(async_flag=True)
-        # self.remaining = []
-        # self.remaining = list(self.all_drones.keys())            
-        # land_req = Trigger.Request()
-        # for drone in self.all_drones.keys():
-        #     self.send_land_request(land_req, drone)
-        # start_time = time.time()
-        # while len(self.remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Land failed for drones {self.remaining}'
-        #         return response
-        #     time.sleep(0.1)
-        # response.message = 'All drones land done'
-        # response.success = True
-        
-        # remaining = list(self.all_drones.keys())
-        # while len(remaining)>0:
-        #     if time.time()-start_time > 15:
-        #         response.success = False
-        #         response.message = f'Land failed for drones {remaining}'
-        #         return response
-        #     for i in remaining:
-        #         ret = self.all_drones[i]._land(async_flag=False, retry=3)
-        #         if ret:
-        #             remaining.remove(i)
-        #             time.sleep(0.5)
-        # response.message = 'All drones land done'
-        # response.success = True
+            t = threading.Thread(target=drone._land, kwargs={'async_flag': True, 'retry': 5})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
+        response.success = bool(threads)
+        response.message = (
+            f'Landing requested for {len(threads)} drone(s).'
+            if threads else 'No drones are connected.'
+        )
         return response
     
     def close_all(self):
@@ -422,28 +462,47 @@ class RobomasterServer(Node):
     def on_activate_t(self):
         if self.armed:
             self.pause_keyboard()
+            threads = []
             for drone in self.all_drones.values():
-                drone._takeoff(async_flag=True, retry=3)
+                t = threading.Thread(target=drone._takeoff, kwargs={'async_flag': True, 'retry': 3})
+                t.start()
+                threads.append(t)
+            for t in threads:
+                t.join()
             self.resume_keyboard()
         else:
             self.get_logger().info("Drone is not armed, please press 'alt+a' to arm")
     @hotkey_callback
     def on_activate_l(self):
         self.pause_keyboard()
+        threads = []
         for drone in self.all_drones.values():
-            drone._land(async_flag=True, retry=3)
+            drone.stop(retry=1)
+            t = threading.Thread(target=drone._land, kwargs={'async_flag': True, 'retry': 3})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
         self.armed = False
         self.resume_keyboard()
     @hotkey_callback
     def on_activate_e(self):
         self.pause_keyboard()
         self.armed = False
+        threads = []
         for drone in self.all_drones.values():
-            drone._emergency(async_flag=True, retry=5)
+            drone.stop(retry=1)
+            t = threading.Thread(target=drone._emergency, kwargs={'async_flag': True, 'retry': 5})
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
         self.resume_keyboard()
     @hotkey_callback
     def on_activate_a(self):
         self.get_logger().info("Drones armed, Accepting commands")
+        for drone in self.all_drones.values():
+            drone.set_motion_armed(True)
         self.armed = True
 
     def pause_keyboard(self):
@@ -456,7 +515,7 @@ class RobomasterServer(Node):
     def run_hotkeys(self):
         self.hotkeys.start()
         self.hotkeys.join()
-        
+
 def main(args=None):
     rclpy.init(args=args)
 
@@ -468,7 +527,14 @@ def main(args=None):
     try:
         node.executor.spin()
     except KeyboardInterrupt:
-        node.close_all()
-        node.executor.shutdown()
-        node.destroy_node()
-    rclpy.shutdown()
+        pass
+    finally:
+        try:
+            node.close_all()
+        except Exception as exc:
+            node.get_logger().error(f'Failed to close all robots: {exc}')
+        finally:
+            node.executor.shutdown()
+            node.destroy_node()
+            if rclpy.ok():
+                rclpy.shutdown()

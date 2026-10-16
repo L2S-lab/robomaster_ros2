@@ -1,202 +1,75 @@
 .. _tutorials:
 
-Tutorials
-=========
+Command-line and trajectory examples
+====================================
 
-Command line
-------------
+Start the configured hardware server first. The examples below use ``rmtt_1``
+and ``rmep_1``; substitute the actual device namespaces. Motion gate settings
+and current example limitations are described in :ref:`configuration` and
+:ref:`fleet_tools`.
 
-Drones
-^^^^^^
-- Takeoff all the connected drones
-
-.. code-block:: bash
-
-   ros2 service call /takeoff_all std_srvs/srv/Trigger "{}"
-
-- Land all the connected drones
+Drone services
+--------------
 
 .. code-block:: bash
 
-   ros2 service call /land_all std_srvs/srv/Trigger "{}"
+   ros2 service call /rmtt_1/set_armed std_srvs/srv/SetBool "{data: true}"
+   ros2 service call /rmtt_1/takeoff robomaster_interface/srv/Takeoff "{height: 1.0, sync: false}"
+   ros2 service call /rmtt_1/hover std_srvs/srv/Empty "{}"
+   ros2 service call /rmtt_1/land std_srvs/srv/Trigger "{}"
 
-- Takeoff individual drones
+``/takeoff_all`` and ``/land_all`` use Trigger and are created only while the
+server has registered drones. ``soft_emergency`` uses Trigger;
+``emergency`` and ``reboot`` use Empty. Emergency requests motor shutdown,
+rather than a normal landing.
 
-.. code-block:: bash
-
-   ros2 service call /drone_1/takeoff robomaster_interface/srv/Takeoff "{height: 0.0}"
-
-- Land individual drones
-
-.. code-block:: bash
-
-   ros2 service call /drone_1/land std_srvs/srv/Trigger "{}"
-
-- Soft emergency landing
+To add a drone dynamically, supply its name/address and camera settings to
+AddDrone. Remove it with RemoveRobot and type ``rmtt``:
 
 .. code-block:: bash
 
-   ros2 service call /drone_1/soft_emergency std_srvs/srv/Trigger "{}"
+   ros2 service call /add_drone robomaster_interface/srv/AddDrone "{name: 'rmtt_extra', ip: '192.168.0.159', cam: false, cam_direction: 0, ext_pose_topic_name: '', ext_pose_topic_type: ''}"
+   ros2 service call /remove_robot robomaster_interface/srv/RemoveRobot "{name: 'rmtt_extra', type: 'rmtt'}"
 
-- Emergency shutdown
+Velocity commands
+-----------------
 
-.. code-block:: bash
-
-   ros2 service call /drone_1/emergency std_srvs/srv/Empty "{}"
-
-- Reboot drone
-
-.. code-block:: bash
-
-    ros2 service call /drone_1/reboot std_srvs/srv/Empty "{}"
-
-- Add drone to the server
+Ground cmd_vel uses m/s and rad/s. Drone cmd_vel uses normalized RC inputs in
+[-1, 1], with X forward, Y left, Z up and positive yaw counterclockwise. Stream
+commands within the configured deadline and publish an explicit zero to stop:
 
 .. code-block:: bash
 
-    ros2 service call /add_drone robomaster_interface/srv/AddDrone "
-    name: <drone_name_str>
-    ip: <drone_ip_str>
-    "
+   ros2 service call /rmep_1/set_armed std_srvs/srv/SetBool "{data: true}"
+   ros2 topic pub --once /rmep_1/cmd_vel geometry_msgs/msg/Twist "{}"
+   ros2 topic pub --once /rmtt_1/cmd_vel geometry_msgs/msg/Twist "{}"
 
-- Remove drone from the server
+An external controller must convert its output to the drone's normalized input
+range. Subscribing to an external Pose/PoseStamped/Point/PointStamped topic does
+not implement the drone ``move`` or ``goto`` services.
 
-.. code-block:: bash
+Existing example executables
+----------------------------
 
-    ros2 service call /remove_drone robomaster_interface/srv/RemoveRobot "
-    name: <drone_name_str>
-    type: 'rmtt'
-    "
+.. list-table::
+   :header-rows: 1
 
-Axis of the drone is Z-up, Y-left, X-forward, as shown in the image below.
+   * - Executable / launch file
+     - Purpose
+   * - ``waypoints`` / ``waypoints.launch.py``
+     - Waypoint tracking with external positioning.
+   * - ``execute_trajectory`` / ``execute_trajectory.launch.py``
+     - Execute configured time-based trajectories.
+   * - ``collission_check`` / ``collission_check.launch.py``
+     - Collision checking and trajectory visualization; spelling matches the executable.
+   * - ``fleet_stress_test``
+     - Concurrent public-API diagnostics and optional ground/motion runs.
+   * - ``joy_fleet_teleop`` / ``joy_fleet_teleop.launch.py``
+     - Joystick control of a selected robot or drone.
 
-.. image:: images/drone_axis.png
-    :align: center
-    :alt: Axis of the drone
-
-Control drones with external positioning system
------------------------------------------------
-
-Drones have velocity command that can be used to control the drone. However, to use this command, the controller needs to know drone's current position. This can be achieved by using an external positioning system such as Vicon or OptiTrack. The following example shows how to use the external positioning system to control the drone's position with simple PID control.
-
-More complex examples are included in the `robomaster_examples` package.
-
-.. code-block:: python
-
-    from std_srvs.srv import Trigger
-    import rclpy
-    from rclpy.node import Node
-    import numpy as np
-    import os
-
-    from tf2_ros.transform_listener import TransformListener, Buffer
-    from geometry_msgs.msg import Twist
-
-    KP = [0.6,0.6,0.75] #[0.6,0.6,0.75]
-    KI = [0.0,0.0,0.0]#[0.0001,0.0001,0.00001]
-    KD = [0.0,0.0,0.0]#[0.0001,0.0001,0.000001]
-
-    class Waypoints(Node):
-    # First takeoff the drone before running the script
-    def __init__(self):
-        super().__init__('waypoints')
-
-        self.world_frame = "world"
-        self.tf_frame = "rmtt_1"
-        self.frequency = 20
-        self.robot_name = "rmtt_1"
-        self.waypoints = np.array([[0,0,1],[1,0,1],[1,1,1],[0,1,1],[0,0,1],[0,0,0.5]])
-
-        self.tfBuffer = Buffer()
-        self.tfListener = TransformListener(self.tfBuffer, self)
-        
-        self.pubCmdVel = self.create_publisher(Twist, f'/{self.robot_name}/cmd_vel', 10)
-        
-        self.land_client = self.create_client(Trigger, f'/{self.robot_name}/land')
-
-        while not (self.land_client.wait_for_service(timeout_sec=1.0)):
-            self.get_logger().info('land service not available, waiting again...')
-        
-        self.Iterm = np.zeros(3)
-        self.e_prev = np.zeros(3)
-
-        self.land_req = Trigger.Request()
-        self._timer = self.create_timer(1.0/self.frequency, self.control_loop)
-
-    def get_transform(self, source_frame, target_frame):
-        return self.tfBuffer.lookup_transform(source_frame, target_frame, rclpy.time.Time())
-            
-    def send_land_request(self):
-        self.land_client.call_async(self.land_req)
-        self.get_logger().info('Land request sent!')
-
-    def control_loop(self):
-        dt = self._timer.time_since_last_call() / 1e9
-        if dt == 0: return # Avoid division by zero on the first call
-
-        try:
-            transform = self.get_transform(self.world_frame, self.tf_frame)
-        except Exception as e:
-            self.get_logger().warn(f'Could not get transform: {e}')
-            return
-
-        current_pos = np.array([
-            transform.transform.translation.x,
-            transform.transform.translation.y,
-            transform.transform.translation.z
-        ])
-        
-        target_pos = self.waypoints[0]
-        error_pos = target_pos - current_pos
-        
-        # --- PID Calculation for each axis ---
-        # Proportional
-        p_term = KP * error_pos
-        
-        # Integral
-        self.Iterm += error_pos * dt
-        i_term = KI * self.Iterm
-        
-        # Derivative
-        d_term = KD * (error_pos - self.e_prev) / dt
-        
-        # Update previous error
-        self.e_prev = error_pos
-        
-        # --- Calculate velocity command ---
-        pid_result = p_term + i_term + d_term
-        
-        cmd = Twist()
-        # Clamp the output velocity to a safe range
-        cmd.linear.x = np.clip(pid_result[0], -0.8, 0.8)
-        cmd.linear.y = np.clip(pid_result[1], -0.8, 0.8)
-        cmd.linear.z = np.clip(pid_result[2], -0.8, 0.8)
-        
-        self.pubCmdVel.publish(cmd)
-
-        # --- Waypoint switching logic ---
-        dist_to_target = np.linalg.norm(error_pos)
-        if dist_to_target < 0.2: 
-            self.get_logger().info(f'Reached waypoint {target_pos}, distance: {dist_to_target:.2f}m')
-            self.waypoints = np.delete(self.waypoints, 0, 0)
-            
-            # Reset PID state to prevent integral windup from affecting the next waypoint
-            self.Iterm = np.zeros(3)
-            self.e_prev = np.zeros(3)
-
-            if len(self.waypoints) == 0:
-                self.get_logger().info('All waypoints reached. Landing...')
-                self.send_land_request()
-                self._timer.destroy()
-
-    def main(args=None):
-        rclpy.init(args=args)
-        waypoints = Waypoints()
-        try:
-            rclpy.spin(waypoints)
-        except KeyboardInterrupt:
-            waypoints.send_land_request()
-            pass
-        waypoints.destroy_node()
-        rclpy.shutdown()
-
+Waypoint CSV/WPS and multi-drone YAML examples live in
+``robomaster_examples/waypoints``. Configure the example's frames, namespaces and
+input files before launching; external positioning is required by the tracking
+controllers. These examples command the existing cmd_vel interface, rather than
+using the unimplemented drone move/goto callbacks. See :ref:`fleet_tools` for
+the newer diagnostic and joystick tools.

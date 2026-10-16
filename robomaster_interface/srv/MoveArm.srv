@@ -1,5 +1,12 @@
 # MoveArm.srv
-float64 x #0-0.22
-float64 z #0-0.15
+float64 x # metres; forward is positive
+float64 z # metres; upward is positive
+bool wait_for_completion
+float64 timeout # seconds; <= 0 uses the configured default; maximum 60
 ---
 bool success
+bool completed
+uint8 action_id
+uint8 percent
+string state
+string message

@@ -27,7 +27,11 @@ if(BUILD_TESTING)
 endif()
 
 set(msg_files
+  "msg/ArmActionStatus.msg"
+  "msg/ArmorHit.msg"
   "msg/GimbalAngle.msg"
+  "msg/GripperState.msg"
+  "msg/IrHit.msg"
   "msg/TelloMpad.msg"
   "msg/GimbalVel.msg"
 )
@@ -43,10 +47,15 @@ set(srv_files
   "srv/TelloLED.srv"
   "srv/TelloMled.srv"
   "srv/Gripper.srv"
+  "srv/GripperCommand.srv"
+  "srv/SetGripperMode.srv"
+  "srv/SetArmorSensitivity.srv"
   "srv/AddRobot.srv"
   "srv/AddDrone.srv"
   "srv/RemoveRobot.srv"
   "srv/RobotLED.srv"
+  "srv/GimbalLED.srv"
+  "srv/BlasterLED.srv"
   "srv/Fire.srv"
 )
 

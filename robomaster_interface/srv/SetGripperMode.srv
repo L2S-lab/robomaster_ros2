@@ -1,0 +1,5 @@
+# mode: timed or feedback
+string mode
+---
+bool success
+string message

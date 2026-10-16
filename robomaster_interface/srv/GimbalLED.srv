@@ -1,0 +1,8 @@
+# Select individual LEDs in the EP/S1 gimbal armor.
+bool on                         # true: illuminate selected LEDs; false: turn them off
+string which                    # "top_all", "top_left", or "top_right"
+std_msgs/ColorRGBA led          # RGB channels use the DJI range 0..255; alpha is ignored
+uint8[] led_list                # LED indices 0..7; empty selects DJI's default [0,1,2,3]
+---
+string message
+bool success
